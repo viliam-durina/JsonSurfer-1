@@ -24,7 +24,6 @@
 
 package org.jsfr.json;
 
-import avro.shaded.com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import org.hamcrest.CustomMatcher;
 import org.hamcrest.Description;
@@ -39,16 +38,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.core.IsCollectionContaining.hasItems;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -1113,13 +1111,13 @@ public abstract class JsonSurferTest {
         Collector collector = surfer.collector(read("array.json"));
 
         // when
-        ValueBox<Object> ne1 = collector.collectOne("$[?(@ != true)]", Object.class);
-        ValueBox<Object> ne2 = collector.collectOne("$[?(@ <> true)]", Object.class);
+        ValueBox<Collection<Object>> ne1 = collector.collectAll("$[?(@ != true)]", Object.class);
+        ValueBox<Collection<Object>> ne2 = collector.collectAll("$[?(@ <> true)]", Object.class);
         collector.exec();
 
         //then
-        assertNotEquals(true, ne1.get());
-        assertNotEquals(true, ne2.get());
+        assertThat(ne1.get(), hasItems("abc", 8.88, json("key", "value"), null));
+        assertThat(ne2.get(), hasItems("abc", 8.88, json("key", "value"), null));
     }
 
     @Test
@@ -1128,13 +1126,13 @@ public abstract class JsonSurferTest {
         Collector collector = surfer.collector(read("array.json"));
 
         // when
-        ValueBox<Object> ne1 = collector.collectOne("$[?(@ != 'abc')]", Object.class);
-        ValueBox<Object> ne2 = collector.collectOne("$[?(@ <> 'abc')]", Object.class);
+        ValueBox<Collection<Object>> ne1 = collector.collectAll("$[?(@ != 'abc')]", Object.class);
+        ValueBox<Collection<Object>> ne2 = collector.collectAll("$[?(@ <> 'abc')]", Object.class);
         collector.exec();
 
         //then
-        assertNotEquals("abc", ne1.get());
-        assertNotEquals("abc", ne2.get());
+        assertThat(ne1.get(), hasItems(8.88, true, json("key", "value"), null));
+        assertThat(ne2.get(), hasItems(8.88, true, json("key", "value"), null));
     }
 
     @Test
@@ -1143,13 +1141,13 @@ public abstract class JsonSurferTest {
         Collector collector = surfer.collector(read("array.json"));
 
         // when
-        ValueBox<Object> ne1 = collector.collectOne("$[?(@ != 8.88)]", Object.class);
-        ValueBox<Object> ne2 = collector.collectOne("$[?(@ <> 8.88)]", Object.class);
+        ValueBox<Collection<Object>> ne1 = collector.collectAll("$[?(@ != 8.88)]", Object.class);
+        ValueBox<Collection<Object>> ne2 = collector.collectAll("$[?(@ <> 8.88)]", Object.class);
         collector.exec();
 
         //then
-        assertNotEquals(8.88d, ne1.get());
-        assertNotEquals(8.88d, ne2.get());
+        assertThat(ne1.get(), hasItems("abc", true, null, json("key", "value")));
+        assertThat(ne2.get(), hasItems("abc", true, null, json("key", "value")));
     }
 
     @Test
@@ -1169,4 +1167,11 @@ public abstract class JsonSurferTest {
         collector.exec();
         assertEquals("Nigel Rees", box.get());
     }
+
+    private Object json(String key, String value) {
+        Object object = this.provider.createObject();
+        this.provider.put(object, key, this.provider.primitive(value));
+        return this.provider.cast(object, Object.class);
+    }
+
 }

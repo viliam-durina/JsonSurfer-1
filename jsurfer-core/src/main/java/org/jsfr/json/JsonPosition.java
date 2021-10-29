@@ -80,4 +80,8 @@ class JsonPosition extends JsonPath {
         pop();
     }
 
+    boolean isInsideArray() {
+        return operators[size - 1] instanceof ArrayIndex;
+    }
+
 }
