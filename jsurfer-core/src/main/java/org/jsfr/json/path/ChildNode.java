@@ -46,7 +46,10 @@ public class ChildNode extends PathOperator {
 
     @Override
     public boolean match(PathOperator pathOperator) {
-        return super.match(pathOperator) && Objects.equals(key, ((ChildNode) pathOperator).key);
+        if (pathOperator instanceof ChildNode) {
+            return Objects.equals(key, ((ChildNode) pathOperator).key);
+        }
+        return false;
     }
 
     @Override

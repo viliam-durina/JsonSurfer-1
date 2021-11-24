@@ -72,7 +72,10 @@ public class JsonPath implements Iterable<PathOperator> {
 
         private JsonPath jsonPath;
 
-        public static Builder start() {
+        public static Builder start(SyntaxMode mode) {
+            if (mode == SyntaxMode.STRICT) {
+                throw new IllegalStateException("strict json path mode is not supported");
+            }
             Builder builder = new Builder();
             builder.jsonPath = new JsonPath();
             return builder;
@@ -100,18 +103,28 @@ public class JsonPath implements Iterable<PathOperator> {
         }
 
 
-        public Builder index(int index) {
-            jsonPath.push(new ArrayIndex(index));
+        public Builder array(String key, int index) {
+            jsonPath.push(new ArrayIndex(key, index));
             return this;
         }
 
-        public Builder indexes(Set<Integer> indexes, TreeMap<Integer, Integer> ranges) {
-            jsonPath.push(new ArrayIndexes(indexes, ranges));
+        public Builder array(String key, Set<Integer> indexes, TreeMap<Integer, Integer> ranges) {
+            jsonPath.push(new ArrayIndexes(key, indexes, ranges));
             return this;
         }
 
-        public Builder anyIndex() {
-            jsonPath.push(Wildcard.SINGLETON);
+        public Builder array(String key, Integer lower, Integer upper) {
+            jsonPath.push(new ArraySlicing(key, lower, upper));
+            return this;
+        }
+
+        public Builder arrayWildcard(String key) {
+            jsonPath.push(new ArrayWildcard(key));
+            return this;
+        }
+
+        public Builder arrayFilter(String key, JsonPathFilter jsonPathFilter) {
+            jsonPath.push(new ArrayFilter(key, jsonPathFilter));
             return this;
         }
 
@@ -125,16 +138,6 @@ public class JsonPath implements Iterable<PathOperator> {
 
         public Builder any() {
             jsonPath.push(Wildcard.SINGLETON);
-            return this;
-        }
-
-        public Builder slicing(Integer lower, Integer upper) {
-            jsonPath.push(new ArraySlicing(lower, upper));
-            return this;
-        }
-
-        public Builder arrayFilter(JsonPathFilter jsonPathFilter) {
-            jsonPath.push(new ArrayFilter(jsonPathFilter));
             return this;
         }
 

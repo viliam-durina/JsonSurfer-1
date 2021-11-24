@@ -31,15 +31,20 @@ import java.util.TreeMap;
 /**
  * Created by Administrator on 2015/3/25.
  */
-public class ArrayIndexes extends PathOperator {
+public class ArrayIndexes extends ChildNode {
 
-    private Set<Integer> indexes;
-    private TreeMap<Integer, Integer> ranges;
+    private final Set<Integer> indexes;
+    private final TreeMap<Integer, Integer> ranges;
 
-    protected ArrayIndexes(Set<Integer> indexes, TreeMap<Integer, Integer> ranges) {
+    protected ArrayIndexes(String key, Set<Integer> indexes, TreeMap<Integer, Integer> ranges) {
+        super(key);
         assert indexes.size() + ranges.size() > 0;
         this.indexes = indexes;
         this.ranges = ranges;
+    }
+
+    protected ArrayIndexes(Set<Integer> indexes, TreeMap<Integer, Integer> ranges) {
+        this(null, indexes, ranges);
     }
 
     @Override
@@ -47,12 +52,15 @@ public class ArrayIndexes extends PathOperator {
         if (!super.match(pathOperator)) {
             return false;
         }
-        int arrayIndex = ((ArrayIndex) pathOperator).getArrayIndex();
-        if (indexes.contains(arrayIndex)) {
-            return true;
+        if (pathOperator instanceof ArrayIndex) {
+            int arrayIndex = ((ArrayIndex) pathOperator).getArrayIndex();
+            if (indexes.contains(arrayIndex)) {
+                return true;
+            }
+            Entry<Integer, Integer> range = ranges.floorEntry(arrayIndex);
+            return range != null && range.getValue() >= arrayIndex;
         }
-        Entry<Integer, Integer> range = ranges.floorEntry(arrayIndex);
-        return range != null && range.getValue() >= arrayIndex;
+        throw new IllegalStateException("unexpected path operator: " + pathOperator);
     }
 
     @Override

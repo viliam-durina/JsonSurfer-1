@@ -24,7 +24,11 @@
 
 package org.jsfr.json.path;
 
-import com.google.common.io.Resources;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
 import com.google.gson.Gson;
 import org.antlr.v4.runtime.InputMismatchException;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
@@ -34,11 +38,7 @@ import org.jsfr.json.provider.JavaCollectionProvider;
 import org.jsfr.json.resolver.PoJoResolver;
 import org.junit.Test;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
+import static org.jsfr.json.TestUtils.readClasspathResource;
 import static org.jsfr.json.compiler.JsonPathCompiler.compile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -47,14 +47,16 @@ import static org.junit.Assert.assertTrue;
 public class JsonPathTest {
 
     @Test
-    public void shallResolvePath() throws Exception {
-        String json = Resources.toString(Resources.getResource("sample2.json"), StandardCharsets.UTF_8);
-        Object retrieved = compile("$[0].calculationAgent.cconsol").resolve(new Gson().fromJson(json, Object.class), JavaCollectionProvider.INSTANCE);
+    public void shallResolvePath() {
+        String json = readClasspathResource("sample2.json", StandardCharsets.UTF_8);
+        Object retrieved =
+            compile("$[0].calculationAgent.cconsol").resolve(new Gson().fromJson(json, Object.class),
+                JavaCollectionProvider.INSTANCE);
         assertEquals("59999", retrieved);
     }
 
     @Test
-    public void shallResolvePOJO() throws Exception {
+    public void shallResolvePOJO() {
         Book book = new Book();
         book.setAuthor("Leo");
         book.setCategory("Fiction");
@@ -66,25 +68,25 @@ public class JsonPathTest {
         assertEquals("JsonSurfer is great!", compile("$.title").resolve(book, new PoJoResolver()));
 
         List<String> list = Arrays.asList("foo", "bar");
-        HashMap<String, Object> map = new HashMap<String, Object>();
+        HashMap<String, Object> map = new HashMap<>();
         map.put("list", list);
-        assertEquals("bar", compile("$[1]").resolve(list, new PoJoResolver()));
-        assertEquals("bar", compile("$.list[1]").resolve(map, JavaCollectionProvider.INSTANCE));
+        assertEquals("bar", compile("$.list[1]").resolve(list, new PoJoResolver()));
+        assertEquals(Arrays.asList("foo", "bar"), compile("$.list").resolve(map, JavaCollectionProvider.INSTANCE));
 
         int[] array = new int[]{12, 34};
         assertEquals(34, compile("$[1]").resolve(array, new PoJoResolver()));
         assertEquals(12, compile("$[0]").resolve(array, new PoJoResolver()));
-
     }
 
     @Test
-    public void shallEnsureJsonPathCapacity() throws Exception {
-        JsonPath path = compile("$.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h");
+    public void shallEnsureJsonPathCapacity() {
+        JsonPath path =
+            compile("$.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h");
         assertEquals(41, path.size);
     }
 
     @Test
-    public void shallMatch() throws Exception {
+    public void shallMatch() {
         JsonPath path1 = compile("$..store..book..book[?(@.category=='fiction')]..title");
         JsonPath path2 = compile("$..store..book.store.book[?(@.category=='fiction')]..title");
         JsonPath path3 = compile("$..store..book.store[?(@.category=='fiction')]..title");
@@ -97,12 +99,79 @@ public class JsonPathTest {
     }
 
     @Test
-    public void testJsonPathFilterMatchRegexInputMismatch() throws Exception {
+    public void testJsonPathFilterMatchRegexInputMismatch() {
         try {
             JsonPathCompiler.compile("$.store.book[?(@.author=~ /abc)]"); // not a valid regular expression
-        } catch (ParseCancellationException e) {
+        }
+        catch (ParseCancellationException e) {
             assertTrue(e.getCause() instanceof InputMismatchException);
         }
+    }
+
+    @Test
+    public void shallMatchArrayElementsAsObject() {
+        //given
+        JsonPath position = compile("$.book[2].store.title");
+        JsonPath path = compile("$.book.store.title");
+
+        //when
+        boolean matched = path.match(position);
+
+        //then
+        assertTrue(matched);
+    }
+
+    @Test
+    public void shallMatchObjectAsArrayElement() {
+        //given
+        JsonPath position = compile("$.book.store.title");
+        JsonPath path = compile("$.book[0].store.title");
+
+        //when
+        boolean matched = path.match(position);
+
+        //then
+        assertTrue(matched);
+    }
+
+    @Test
+    public void shallMatchObjectAsArrayWildcard() {
+        //given
+        JsonPath position = compile("$.book.store.title");
+        JsonPath path = compile("$.book[*].store.title");
+
+        //when
+        boolean matched = path.match(position);
+
+        //then
+        assertTrue(matched);
+    }
+
+    @Test
+    public void lax_is_supported_syntax_mode() {
+        //given
+        JsonPath position = compile("$.book.store.title");
+
+        //when
+        JsonPath path1 = compile("lax $.book[*].store.title");
+        JsonPath path2 = compile("LAX $.book[*].store.title");
+        boolean matched1 = path1.match(position);
+        boolean matched2 = path2.match(position);
+
+        //then
+        assertTrue(matched1);
+        assertTrue(matched2);
+    }
+
+    @Test(expected = java.lang.IllegalStateException.class)
+    public void strict_is_not_supported_syntax_mode() {
+        //given
+
+        //when
+        compile("strict $.book[*].store.title");
+
+        //then
+        //exception should be here
     }
 
 }

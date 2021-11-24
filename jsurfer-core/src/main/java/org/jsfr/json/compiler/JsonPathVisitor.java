@@ -19,6 +19,12 @@ public interface JsonPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPath(JsonPathParser.PathContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link JsonPathParser#syntaxMode}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSyntaxMode(JsonPathParser.SyntaxModeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link JsonPathParser#relativePath}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -42,12 +48,6 @@ public interface JsonPathVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAnyChild(JsonPathParser.AnyChildContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JsonPathParser#anyIndex}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAnyIndex(JsonPathParser.AnyIndexContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link JsonPathParser#any}.
 	 * @param ctx the parse tree
@@ -73,23 +73,29 @@ public interface JsonPathVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSlicing(JsonPathParser.SlicingContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link JsonPathParser#filter}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFilter(JsonPathParser.FilterContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link JsonPathParser#childNode}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitChildNode(JsonPathParser.ChildNodeContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link JsonPathParser#array}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArray(JsonPathParser.ArrayContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link JsonPathParser#childrenNode}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitChildrenNode(JsonPathParser.ChildrenNodeContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link JsonPathParser#filter}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitFilter(JsonPathParser.FilterContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link JsonPathParser#filterExpr}.
 	 * @param ctx the parse tree

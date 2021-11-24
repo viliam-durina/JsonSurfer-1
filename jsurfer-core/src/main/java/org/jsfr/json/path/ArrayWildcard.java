@@ -24,47 +24,25 @@
 
 package org.jsfr.json.path;
 
-/**
- * Created by Leo on 2015/4/1.
- */
-public class ArraySlicing extends ChildNode {
+public class ArrayWildcard extends ChildNode {
 
-    private final Integer lowerBound;
-    private final Integer upperBound;
-
-    protected ArraySlicing(String key, Integer lowerBound, Integer upperBound) {
+    public ArrayWildcard(String key) {
         super(key);
-        this.lowerBound = lowerBound;
-        this.upperBound = upperBound;
-    }
-
-    protected ArraySlicing(Integer lowerBound, Integer upperBound) {
-        this(null, lowerBound, upperBound);
     }
 
     @Override
     public boolean match(PathOperator pathOperator) {
-        if (!super.match(pathOperator)) {
-            return false;
-        }
-        if (pathOperator instanceof ArrayIndex) {
-            int index = ((ArrayIndex) pathOperator).getArrayIndex();
-            if (lowerBound == null && upperBound == null) {
-                return true;
-            } else if (lowerBound == null) {
-                return index < upperBound;
-            } else if (upperBound == null) {
-                return index >= lowerBound;
-            } else {
-                return lowerBound <= index && index < upperBound;
-            }
-        } else {
-            throw new IllegalStateException("unexpected path operator: " + pathOperator);
-        }
+        return super.match(pathOperator);
     }
 
     @Override
     public Type getType() {
         return Type.ARRAY;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "[*]";
+    }
+
 }

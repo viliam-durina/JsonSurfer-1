@@ -4,24 +4,26 @@ grammar JsonPath;
 package org.jsfr.json.compiler;
 }
 
-path: '$' relativePath* EOF;
-relativePath: searchChild|search|index|indexes|slicing|childNode|childrenNode|anyChild|anyIndex|any|filter;
-searchChild: '..' KEY;
+path: syntaxMode? '$' relativePath* EOF;
+syntaxMode: 'lax' | 'LAX' | 'strict' | 'STRICT';
+relativePath: searchChild|search|childNode|array|childrenNode|anyChild|any;
+searchChild: '..' KEY array?;
 search: '..' ;
 anyChild: '.*' ;
-anyIndex: '[*]' ;
 any: '*' ;
+ANY_INDEX: '[*]' ;
 index: ('[' NUM ']') | ('.' NUM);
+indexes: OPEN_SQ_BRACKET NUM (TO NUM)? ( COMMA NUM (TO NUM)? ) * CLOSE_SQ_BRACKET ;
 OPEN_SQ_BRACKET: '[';
 CLOSE_SQ_BRACKET: ']';
 TO: 'to';
 COMMA: ',';
-indexes: OPEN_SQ_BRACKET NUM (TO NUM)? ( COMMA NUM (TO NUM)? ) * CLOSE_SQ_BRACKET ;
 slicing: '[' NUM? COLON NUM? ']';
-COLON : ':';
-childNode: '.' (KEY | QUOTED_STRING) ;
-childrenNode: '[' QUOTED_STRING ( ',' QUOTED_STRING )* ']' ;
 filter: '[?(' filterExpr ')]';
+COLON : ':';
+childNode: '.' (KEY | QUOTED_STRING) array?;
+array: index | indexes | slicing | filter | ANY_INDEX;
+childrenNode: '[' QUOTED_STRING ( ',' QUOTED_STRING )* ']' ;
 filterExpr : NegationOperator '(' filterExpr ')'
            | filterExpr AndOperator filterExpr
            | filterExpr OrOperator filterExpr
