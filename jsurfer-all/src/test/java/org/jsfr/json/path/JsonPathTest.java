@@ -30,10 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.google.gson.Gson;
-import org.antlr.v4.runtime.InputMismatchException;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.jsfr.json.Book;
-import org.jsfr.json.compiler.JsonPathCompiler;
+import org.jsfr.json.exception.JsonPathCompilerException;
+import org.jsfr.json.exception.UnsupportedStateException;
 import org.jsfr.json.provider.JavaCollectionProvider;
 import org.jsfr.json.resolver.PoJoResolver;
 import org.junit.Test;
@@ -42,6 +41,7 @@ import static org.jsfr.json.TestUtils.readClasspathResource;
 import static org.jsfr.json.compiler.JsonPathCompiler.compile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class JsonPathTest {
@@ -99,16 +99,6 @@ public class JsonPathTest {
     }
 
     @Test
-    public void testJsonPathFilterMatchRegexInputMismatch() {
-        try {
-            JsonPathCompiler.compile("$.store.book[?(@.author=~ /abc)]"); // not a valid regular expression
-        }
-        catch (ParseCancellationException e) {
-            assertTrue(e.getCause() instanceof InputMismatchException);
-        }
-    }
-
-    @Test
     public void shallMatchArrayElementsAsObject() {
         //given
         JsonPath position = compile("$.book[2].store.title");
@@ -163,15 +153,52 @@ public class JsonPathTest {
         assertTrue(matched2);
     }
 
-    @Test(expected = java.lang.IllegalStateException.class)
+    @Test
     public void strict_is_not_supported_syntax_mode() {
         //given
+        String path = "strict $.book[*].store.title";
 
         //when
-        compile("strict $.book[*].store.title");
+        UnsupportedStateException exception = assertThrows(
+            UnsupportedStateException.class,
+            () -> compile(path)
+        );
 
         //then
-        //exception should be here
+        assertEquals("STRICT json path mode is not supported", exception.getMessage());
+    }
+
+    @Test
+    public void compiler_errors_should_be_handler() {
+        //given
+        String path1 = "$((@@$#229))";
+        String path2 = "";
+        String path3 = "[1,2,3]";
+        String path4 = "$.store.book[?(@.author=~ /abc)]";
+
+        //when
+        JsonPathCompilerException exception1 = assertThrows(
+            JsonPathCompilerException.class,
+            () -> compile(path1)
+        );
+        JsonPathCompilerException exception2 = assertThrows(
+            JsonPathCompilerException.class,
+            () -> compile(path2)
+        );
+        JsonPathCompilerException exception3 = assertThrows(
+            JsonPathCompilerException.class,
+            () -> compile(path3)
+        );
+        JsonPathCompilerException exception4 = assertThrows(
+            JsonPathCompilerException.class,
+            () -> compile(path4)
+        );
+
+        //then
+        assertEquals("Unexpected token at line 1 start: 1 end: 1", exception1.getMessage());
+        assertEquals("Unexpected token at line 1 start: 0 end: -1", exception2.getMessage());
+        assertEquals("Unexpected token at line 1 start: 0 end: 0", exception3.getMessage());
+        assertEquals("Unexpected token at line 1 start: 26 end: 29", exception4.getMessage());
     }
 
 }

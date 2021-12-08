@@ -37,6 +37,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.jsfr.json.exception.JsonPathCompilerException;
 import org.jsfr.json.filter.EqualityBoolPredicate;
 import org.jsfr.json.filter.EqualityNumPredicate;
 import org.jsfr.json.filter.EqualityStrPredicate;
@@ -441,7 +442,12 @@ public class JsonPathCompiler extends JsonPathBaseVisitor<Void> {
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         JsonPathParser parser = new JsonPathParser(tokens);
         parser.setErrorHandler(new BailErrorStrategy());
-        JsonPathParser.PathContext tree = parser.path();
+        JsonPathParser.PathContext tree;
+        try {
+            tree = parser.path();
+        } catch (RuntimeException e) {
+            throw JsonPathCompilerException.from(e);
+        }
         JsonPathCompiler compiler = new JsonPathCompiler();
         compiler.visit(tree);
         return compiler.pathBuilder.build();

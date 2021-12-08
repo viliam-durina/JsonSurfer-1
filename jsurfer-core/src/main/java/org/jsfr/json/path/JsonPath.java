@@ -24,6 +24,7 @@
 
 package org.jsfr.json.path;
 
+import org.jsfr.json.exception.UnsupportedStateException;
 import org.jsfr.json.filter.JsonPathFilter;
 import org.jsfr.json.resolver.DocumentResolver;
 
@@ -74,7 +75,7 @@ public class JsonPath implements Iterable<PathOperator> {
 
         public static Builder start(SyntaxMode mode) {
             if (mode == SyntaxMode.STRICT) {
-                throw new IllegalStateException("strict json path mode is not supported");
+                throw new UnsupportedStateException("STRICT json path mode is not supported");
             }
             Builder builder = new Builder();
             builder.jsonPath = new JsonPath();
