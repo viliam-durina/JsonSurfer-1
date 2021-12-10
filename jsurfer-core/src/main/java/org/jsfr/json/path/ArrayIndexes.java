@@ -43,10 +43,6 @@ public class ArrayIndexes extends ChildNode {
         this.ranges = ranges;
     }
 
-    protected ArrayIndexes(Set<Integer> indexes, TreeMap<Integer, Integer> ranges) {
-        this(null, indexes, ranges);
-    }
-
     @Override
     public boolean match(PathOperator pathOperator) {
         if (!super.match(pathOperator)) {

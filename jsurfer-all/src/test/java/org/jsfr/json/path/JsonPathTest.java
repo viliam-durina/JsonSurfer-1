@@ -201,4 +201,35 @@ public class JsonPathTest {
         assertEquals("Unexpected token at line 1 start: 26 end: 29", exception4.getMessage());
     }
 
+    @Test
+    public void array_range() {
+        //given
+        JsonPath path = compile("$.book[0 to 2]");
+
+        //when
+        boolean matched1 = path.match(compile("$.book[0]"));
+        boolean matched2 = path.match(compile("$.book[1]"));
+        boolean matched3 = path.match(compile("$.book[2]"));
+
+        //then
+        assertTrue(matched1);
+        assertTrue(matched2);
+        assertTrue(matched3);
+    }
+
+    @Test
+    public void array_slicing() {
+        //given
+        JsonPath path = compile("$.book[0:2]");
+
+        //when
+        boolean matched1 = path.match(compile("$.book[0]"));
+        boolean matched2 = path.match(compile("$.book[1]"));
+        boolean matched3 = path.match(compile("$.book[2]"));
+
+        //then
+        assertTrue(matched1);
+        assertTrue(matched2);
+        assertFalse(matched3);
+    }
 }
