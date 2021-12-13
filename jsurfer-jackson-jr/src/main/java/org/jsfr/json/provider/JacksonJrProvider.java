@@ -24,6 +24,7 @@
 
 package org.jsfr.json.provider;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +89,11 @@ public class JacksonJrProvider implements JsonProvider<Map<Object, Object>, List
 
     @Override
     public Object primitive(String value) {
+        return value;
+    }
+
+    @Override
+    public Object primitive(BigInteger value) {
         return value;
     }
 

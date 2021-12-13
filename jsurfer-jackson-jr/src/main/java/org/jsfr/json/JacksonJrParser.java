@@ -98,7 +98,11 @@ public class JacksonJrParser implements JsonParserAdapter {
             this.longHolder = new AbstractPrimitiveHolder(context.getConfig()) {
                 @Override
                 public Object doGetValue() throws IOException {
-                    return jsonProvider.primitive(jsonParser.getLongValue());
+                    if (jsonParser.getNumberType() == JsonParser.NumberType.BIG_INTEGER) {
+                        return jsonProvider.primitive(jsonParser.getBigIntegerValue());
+                    }  else {
+                        return jsonProvider.primitive(jsonParser.getLongValue());
+                    }
                 }
 
                 @Override
