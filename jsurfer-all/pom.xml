@@ -22,22 +22,22 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.jsurfer</groupId>
+            <groupId>com.hazelcast.jsurfer</groupId>
             <artifactId>jsurfer-fastjson</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.jsurfer</groupId>
+            <groupId>com.hazelcast.jsurfer</groupId>
             <artifactId>jsurfer-gson</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.jsurfer</groupId>
+            <groupId>com.hazelcast.jsurfer</groupId>
             <artifactId>jsurfer-jackson</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.jsurfer</groupId>
+            <groupId>com.hazelcast.jsurfer</groupId>
             <artifactId>jsurfer-jackson-jr</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -67,7 +67,7 @@
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.jsurfer</groupId>
+            <groupId>com.hazelcast.jsurfer</groupId>
             <artifactId>jsurfer-jsonsimple</artifactId>
             <version>${project.version}</version>
         </dependency>

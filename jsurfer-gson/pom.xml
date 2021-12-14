@@ -59,7 +59,7 @@
             <version>${gson.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.jsurfer</groupId>
+            <groupId>com.hazelcast.jsurfer</groupId>
             <artifactId>jsurfer-core</artifactId>
             <version>${project.version}</version>
         </dependency>
