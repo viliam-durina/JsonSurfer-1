@@ -34,7 +34,7 @@ public class Root extends PathOperator {
         return INSTANCE;
     }
 
-    private Root() {
+    protected Root() {
     }
 
     @Override

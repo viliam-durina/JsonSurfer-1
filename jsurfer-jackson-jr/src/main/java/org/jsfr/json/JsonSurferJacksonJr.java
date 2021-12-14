@@ -22,35 +22,18 @@
  * SOFTWARE.
  */
 
-package org.jsfr.json.filter;
+package org.jsfr.json;
 
-import org.jsfr.json.PrimitiveHolder;
-import org.jsfr.json.path.JsonPath;
-import org.jsfr.json.provider.JsonProvider;
-
-import java.math.BigDecimal;
+import org.jsfr.json.provider.JacksonJrProvider;
 
 /**
- * Created by Leo on 2017/4/4.
+ * Created by Leo on 2017/4/1.
  */
-public class LessThanNumPredicate extends BasicJsonPathFilter {
+public class JsonSurferJacksonJr {
 
-    private final BigDecimal value;
+    public final static JsonSurfer INSTANCE = new JsonSurfer(JacksonJrParser.INSTANCE, JacksonJrProvider.INSTANCE);
 
-    public LessThanNumPredicate(JsonPath relativePath, BigDecimal value) {
-        super(relativePath);
-        this.value = value;
+    public static JsonSurfer createSurfer() {
+      return new JsonSurfer(new JacksonJrParser(), JacksonJrProvider.INSTANCE);
     }
-
-    @Override
-    public boolean apply(JsonPath jsonPosition, PrimitiveHolder primitiveHolder, JsonProvider jsonProvider) {
-        if (primitiveHolder != null && this.getRelativePath().matchFilterPath(jsonPosition)) {
-            Object candidate = primitiveHolder.getValue();
-            Integer comparison = tryCompare(candidate, value);
-            return comparison != null && comparison < 0;
-        } else {
-            return false;
-        }
-    }
-
 }

@@ -224,7 +224,7 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
                 doMatching(null);
                 break;
             case ARRAY:
-                accumulateArrayIndex((ArrayIndex) currentNode);
+                accumulateArrayIndex(currentNode);
 //                startArrayElement();
                 doMatching(null);
                 break;
@@ -266,10 +266,10 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
         PathOperator currentNode = currentPosition.peek();
         switch (currentNode.getType()) {
             case OBJECT:
-                doMatching(null);
+                //doMatching(null);
                 break;
             case ARRAY:
-                accumulateArrayIndex((ArrayIndex) currentNode);
+                accumulateArrayIndex(currentNode);
 //                startArrayElement();
                 doMatching(null);
                 break;
@@ -284,8 +284,12 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
         return true;
     }
 
-    private void accumulateArrayIndex(ArrayIndex arrayIndex) {
-        arrayIndex.increaseArrayIndex();
+    private void accumulateArrayIndex(PathOperator arrayIndex) {
+        if (arrayIndex instanceof ArrayIndex) {
+            ((ArrayIndex)arrayIndex).increaseArrayIndex();
+        } else {
+            throw new IllegalStateException("Only array and root array operators are expected");
+        }
     }
 
     @Override
@@ -309,7 +313,7 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
                 doMatching(primitiveHolder);
                 break;
             case ARRAY:
-                accumulateArrayIndex((ArrayIndex) currentNode);
+                accumulateArrayIndex(currentNode);
 //                startArrayElement();
                 doMatching(primitiveHolder);
                 break;

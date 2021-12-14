@@ -24,37 +24,39 @@
 
 package org.jsfr.json.path;
 
-import com.google.common.io.Resources;
-import com.google.gson.Gson;
-import org.antlr.v4.runtime.InputMismatchException;
-import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.jsfr.json.Book;
-import org.jsfr.json.compiler.JsonPathCompiler;
-import org.jsfr.json.provider.JavaCollectionProvider;
-import org.jsfr.json.resolver.PoJoResolver;
-import org.junit.Test;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gson.Gson;
+import org.jsfr.json.Book;
+import org.jsfr.json.exception.JsonPathCompilerException;
+import org.jsfr.json.exception.UnsupportedStateException;
+import org.jsfr.json.provider.JavaCollectionProvider;
+import org.jsfr.json.resolver.PoJoResolver;
+import org.junit.Test;
+
+import static org.jsfr.json.TestUtils.readClasspathResource;
 import static org.jsfr.json.compiler.JsonPathCompiler.compile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class JsonPathTest {
 
     @Test
-    public void shallResolvePath() throws Exception {
-        String json = Resources.toString(Resources.getResource("sample2.json"), StandardCharsets.UTF_8);
-        Object retrieved = compile("$[0].calculationAgent.cconsol").resolve(new Gson().fromJson(json, Object.class), JavaCollectionProvider.INSTANCE);
+    public void shallResolvePath() {
+        String json = readClasspathResource("sample2.json", StandardCharsets.UTF_8);
+        Object retrieved =
+            compile("$[0].calculationAgent.cconsol").resolve(new Gson().fromJson(json, Object.class),
+                JavaCollectionProvider.INSTANCE);
         assertEquals("59999", retrieved);
     }
 
     @Test
-    public void shallResolvePOJO() throws Exception {
+    public void shallResolvePOJO() {
         Book book = new Book();
         book.setAuthor("Leo");
         book.setCategory("Fiction");
@@ -66,25 +68,25 @@ public class JsonPathTest {
         assertEquals("JsonSurfer is great!", compile("$.title").resolve(book, new PoJoResolver()));
 
         List<String> list = Arrays.asList("foo", "bar");
-        HashMap<String, Object> map = new HashMap<String, Object>();
+        HashMap<String, Object> map = new HashMap<>();
         map.put("list", list);
-        assertEquals("bar", compile("$[1]").resolve(list, new PoJoResolver()));
-        assertEquals("bar", compile("$.list[1]").resolve(map, JavaCollectionProvider.INSTANCE));
+        assertEquals("bar", compile("$.list[1]").resolve(list, new PoJoResolver()));
+        assertEquals(Arrays.asList("foo", "bar"), compile("$.list").resolve(map, JavaCollectionProvider.INSTANCE));
 
         int[] array = new int[]{12, 34};
         assertEquals(34, compile("$[1]").resolve(array, new PoJoResolver()));
         assertEquals(12, compile("$[0]").resolve(array, new PoJoResolver()));
-
     }
 
     @Test
-    public void shallEnsureJsonPathCapacity() throws Exception {
-        JsonPath path = compile("$.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h");
+    public void shallEnsureJsonPathCapacity() {
+        JsonPath path =
+            compile("$.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h.a.b.c.d.e.f.g.h");
         assertEquals(41, path.size);
     }
 
     @Test
-    public void shallMatch() throws Exception {
+    public void shallMatch() {
         JsonPath path1 = compile("$..store..book..book[?(@.category=='fiction')]..title");
         JsonPath path2 = compile("$..store..book.store.book[?(@.category=='fiction')]..title");
         JsonPath path3 = compile("$..store..book.store[?(@.category=='fiction')]..title");
@@ -97,12 +99,137 @@ public class JsonPathTest {
     }
 
     @Test
-    public void testJsonPathFilterMatchRegexInputMismatch() throws Exception {
-        try {
-            JsonPathCompiler.compile("$.store.book[?(@.author=~ /abc)]"); // not a valid regular expression
-        } catch (ParseCancellationException e) {
-            assertTrue(e.getCause() instanceof InputMismatchException);
-        }
+    public void shallMatchArrayElementsAsObject() {
+        //given
+        JsonPath position = compile("$.book[2].store.title");
+        JsonPath path = compile("$.book.store.title");
+
+        //when
+        boolean matched = path.match(position);
+
+        //then
+        assertTrue(matched);
     }
 
+    @Test
+    public void shallMatchObjectAsArrayElement() {
+        //given
+        JsonPath position = compile("$.book.store.title");
+        JsonPath path = compile("$.book[0].store.title");
+
+        //when
+        boolean matched = path.match(position);
+
+        //then
+        assertTrue(matched);
+    }
+
+    @Test
+    public void shallMatchObjectAsArrayWildcard() {
+        //given
+        JsonPath position = compile("$.book.store.title");
+        JsonPath path = compile("$.book[*].store.title");
+
+        //when
+        boolean matched = path.match(position);
+
+        //then
+        assertTrue(matched);
+    }
+
+    @Test
+    public void lax_is_supported_syntax_mode() {
+        //given
+        JsonPath position = compile("$.book.store.title");
+
+        //when
+        JsonPath path1 = compile("lax $.book[*].store.title");
+        JsonPath path2 = compile("LAX $.book[*].store.title");
+        boolean matched1 = path1.match(position);
+        boolean matched2 = path2.match(position);
+
+        //then
+        assertTrue(matched1);
+        assertTrue(matched2);
+    }
+
+    @Test
+    public void strict_is_not_supported_syntax_mode() {
+        //given
+        String path = "strict $.book[*].store.title";
+
+        //when
+        UnsupportedStateException exception = assertThrows(
+            UnsupportedStateException.class,
+            () -> compile(path)
+        );
+
+        //then
+        assertEquals("STRICT json path mode is not supported", exception.getMessage());
+    }
+
+    @Test
+    public void compiler_errors_should_be_handler() {
+        //given
+        String path1 = "$((@@$#229))";
+        String path2 = "";
+        String path3 = "[1,2,3]";
+        String path4 = "$.store.book[?(@.author=~ /abc)]";
+
+        //when
+        JsonPathCompilerException exception1 = assertThrows(
+            JsonPathCompilerException.class,
+            () -> compile(path1)
+        );
+        JsonPathCompilerException exception2 = assertThrows(
+            JsonPathCompilerException.class,
+            () -> compile(path2)
+        );
+        JsonPathCompilerException exception3 = assertThrows(
+            JsonPathCompilerException.class,
+            () -> compile(path3)
+        );
+        JsonPathCompilerException exception4 = assertThrows(
+            JsonPathCompilerException.class,
+            () -> compile(path4)
+        );
+
+        //then
+        assertEquals("Unexpected token at line 1 start: 1 end: 1", exception1.getMessage());
+        assertEquals("Unexpected token at line 1 start: 0 end: -1", exception2.getMessage());
+        assertEquals("Unexpected token at line 1 start: 0 end: 0", exception3.getMessage());
+        assertEquals("Unexpected token at line 1 start: 26 end: 29", exception4.getMessage());
+    }
+
+    @Test
+    public void array_range() {
+        //given
+        JsonPath path = compile("$.book[0 to 2]");
+
+        //when
+        boolean matched1 = path.match(compile("$.book[0]"));
+        boolean matched2 = path.match(compile("$.book[1]"));
+        boolean matched3 = path.match(compile("$.book[2]"));
+
+        //then
+        assertTrue(matched1);
+        assertTrue(matched2);
+        assertTrue(matched3);
+    }
+
+    @Test
+    public void array_slicing() {
+        //given
+        JsonPath path = compile("$.book[0:2]");
+
+        //when
+        boolean matched1 = path.match(compile("$.book[0]"));
+        boolean matched2 = path.match(compile("$.book[1]"));
+        boolean matched3 = path.match(compile("$.book[2]"));
+
+        //then
+        assertTrue(matched1);
+        assertTrue(matched2);
+        assertFalse(matched3);
+    }
 }

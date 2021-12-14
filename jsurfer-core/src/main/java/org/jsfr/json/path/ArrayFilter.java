@@ -26,18 +26,22 @@ package org.jsfr.json.path;
 
 import org.jsfr.json.filter.JsonPathFilter;
 
-public class ArrayFilter extends PathOperator {
+public class ArrayFilter extends ChildNode {
 
-    private JsonPathFilter jsonPathFilter;
+    private final JsonPathFilter jsonPathFilter;
 
-    public ArrayFilter(JsonPathFilter jsonPathFilter) {
+    public ArrayFilter(String key, JsonPathFilter jsonPathFilter) {
+        super(key);
         this.jsonPathFilter = jsonPathFilter;
     }
 
-//    @Override
-//    public boolean match(PathOperator pathOperator) {
-//        return pathOperator instanceof ArrayIndex; // match any array element, filtering is done in the JsonFilterVerifier
-//    }
+    @Override
+    public boolean match(PathOperator pathOperator) {
+        if (!super.match(pathOperator)) {
+            return false;
+        }
+        return pathOperator instanceof ArrayIndex;
+    }
 
     public JsonPathFilter getJsonPathFilter() {
         return jsonPathFilter;
@@ -50,7 +54,7 @@ public class ArrayFilter extends PathOperator {
 
     @Override
     public String toString() {
-        return "[?(@...]"; // TODO write toString methods for filter path
+        return super.toString() + "[?(@...]";
     }
 
 }

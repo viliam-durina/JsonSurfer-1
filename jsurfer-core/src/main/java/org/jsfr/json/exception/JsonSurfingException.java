@@ -37,4 +37,8 @@ public class JsonSurfingException extends RuntimeException {
         super(message, cause);
     }
 
+    public JsonSurfingException(String message) {
+        super(message);
+    }
+
 }

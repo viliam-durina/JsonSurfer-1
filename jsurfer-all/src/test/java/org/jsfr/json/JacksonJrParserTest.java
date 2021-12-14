@@ -22,35 +22,41 @@
  * SOFTWARE.
  */
 
-package org.jsfr.json.filter;
+package org.jsfr.json;
 
-import org.jsfr.json.PrimitiveHolder;
-import org.jsfr.json.path.JsonPath;
-import org.jsfr.json.provider.JsonProvider;
+import org.jsfr.json.provider.JacksonJrProvider;
+import org.junit.Before;
+import org.junit.Ignore;
 
-import java.math.BigDecimal;
+public class JacksonJrParserTest extends JsonSurferTest {
 
-/**
- * Created by Leo on 2017/4/4.
- */
-public class LessThanNumPredicate extends BasicJsonPathFilter {
-
-    private final BigDecimal value;
-
-    public LessThanNumPredicate(JsonPath relativePath, BigDecimal value) {
-        super(relativePath);
-        this.value = value;
+    @Before
+    public void setUp() {
+        provider = new JacksonJrProvider();
+        surfer = new JsonSurfer(new JacksonJrParser(), provider);
     }
 
+    @Ignore
     @Override
-    public boolean apply(JsonPath jsonPosition, PrimitiveHolder primitiveHolder, JsonProvider jsonProvider) {
-        if (primitiveHolder != null && this.getRelativePath().matchFilterPath(jsonPosition)) {
-            Object candidate = primitiveHolder.getValue();
-            Integer comparison = tryCompare(candidate, value);
-            return comparison != null && comparison < 0;
-        } else {
-            return false;
-        }
+    public void testTypeCasting() {
+        // ignore
     }
 
+    @Ignore
+    @Override
+    public void testTypeBindingOne() {
+        // ignore
+    }
+
+    @Ignore
+    @Override
+    public void testTypeBindingOneWithFilter() {
+        // ignore
+    }
+
+    @Ignore
+    @Override
+    public void testTypeBindingCollection() {
+        // ignore
+    }
 }
