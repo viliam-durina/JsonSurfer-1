@@ -1,9 +1,6 @@
 # JsonSurfer - Let's surf on Json!
 
-[![Join the chat at https://gitter.im/jsurfer/JsonSurfer](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/jsurfer/JsonSurfer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-![](https://travis-ci.org/jsurfer/JsonSurfer.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/jsurfer/JsonSurfer/badge.svg)](https://coveralls.io/r/jsurfer/JsonSurfer) 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jsurfer/jsurfer/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/com.github.jsurfer/jsurfer)
-
+This repo was copied from https://github.com/jsurfer/JsonSurfer
 
 ## Why JsonSurfer
 
@@ -45,34 +42,34 @@
 | `[start:end]`             | array slice       |
 | `[?(<expression>)]`       | filter expression |
 
-* JsonSurfer is available in cetral maven repository.
+* JsonSurfer is available in central maven repository.
 
-JsonSurfer has drivers for most of popular json libraries including: Gson, Jackson, FastJson and JsonSimple. Choose one and add to your POM.
+JsonSurfer has drivers for most popular json libraries including: Gson, Jackson, FastJson and JsonSimple. Choose one and add to your POM.
 
 ```xml
 
 <dependency>
-    <groupId>com.github.jsurfer</groupId>
+    <groupId>com.hazelcast.jsurfer</groupId>
     <artifactId>jsurfer-gson</artifactId>
-    <version>1.6.3</version>
+    <version>1.7.0-SNAPSHOT</version>
 </dependency>
 
 <dependency>
-    <groupId>com.github.jsurfer</groupId>
+    <groupId>com.hazelcast.jsurfer</groupId>
     <artifactId>jsurfer-jackson</artifactId>
-    <version>1.6.3</version>
+    <version>1.7.0-SNAPSHOT</version>
 </dependency>
 
 <dependency>
-    <groupId>com.github.jsurfer</groupId>
+    <groupId>com.hazelcast.jsurfer</groupId>
     <artifactId>jsurfer-fastjson</artifactId>
-    <version>1.6.3</version>
+    <version>1.7.0-SNAPSHOT</version>
 </dependency>
 
 <dependency>
-    <groupId>com.github.jsurfer</groupId>
+    <groupId>com.hazelcast.jsurfer</groupId>
     <artifactId>jsurfer-jsonsimple</artifactId>
-    <version>1.6.3</version>
+    <version>1.7.0-SNAPSHOT</version>
 </dependency>
 
 ```
@@ -127,16 +124,7 @@ or
         box2.get();
         box3.get();
 ```
-#### 【DEPRECATED】 Collect the first matched value and stop immediately
-```java
-        JsonSurfer jsonSurfer = JsonSurferGson.INSTANCE;
-        Object singleResult = jsonSurfer.collectOne(sample, "$.store.book[0]");
-```
-#### 【DEPRECATED】 Colllect every matched value into a collection
-```java
-        JsonSurfer jsonSurfer = JsonSurferGson.INSTANCE;
-        Collection<Object> multipleResults = jsonSurfer.collectAll(sample, "$.store.book[*]");
-```
+
 #### "Surfing" in Json and collecting matched value in the listeners
 ```java
         JsonSurfer surfer = JsonSurferGson.INSTANCE;
@@ -221,9 +209,9 @@ Then create a JsonSurfer with CBOR-backed JacksonParser and surfer as usual
 ```java
     surfer = new JsonSurfer(new JacksonParser(new CBORFactory()), provider);
 ```
-Find more examples here: https://github.com/jsurfer/JsonSurfer/blob/master/jsurfer-all/src/test/java/org/jsfr/json/JacksonParserTest.java
+Find more examples here: https://github.com/hazelcast/JsonSurfer/blob/master/jsurfer-all/src/test/java/org/jsfr/json/JacksonParserTest.java
 #### Share data among processors
-Since JsonSurfer emit data in the way of callback, it would be difficult if one of your processing depends one another. Therefore a simple transient map is added for sharing data among your processors. Following unit test shows how to use it:
+Since JsonSurfer emit data in the way of callback, it would be difficult if one of your processing depends on another. Therefore, a simple transient map is added for sharing data among your processors. Following unit test shows how to use it:
 ```java
         surfer.configBuilder().bind("$.store.book[1]", new JsonPathListener() {
             @Override
@@ -283,7 +271,7 @@ Java8 user can also convert the iterator into a Stream
           Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED),
           false);
 ```
-Functions implmented by Streams API
+Functions implemented by Streams API
 ```java
     public static Stream<Object> toStream(String json, String path) {
         Iterator<Object> iterator = JsonSurferJackson.INSTANCE.iterator(json, JsonPathCompiler.compile(path));
