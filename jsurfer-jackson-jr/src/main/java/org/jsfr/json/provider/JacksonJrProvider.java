@@ -32,6 +32,9 @@ import java.util.Map;
 
 public class JacksonJrProvider implements JsonProvider<Map<Object, Object>, List<Object>, Object> {
 
+    /**
+     * Immutable shared instance
+     */
     public static final JacksonJrProvider INSTANCE = new JacksonJrProvider();
 
     public JacksonJrProvider() {

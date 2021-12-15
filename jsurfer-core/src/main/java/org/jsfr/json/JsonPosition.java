@@ -82,7 +82,7 @@ class JsonPosition extends JsonPath {
     private void pushArray(PathOperator node) {
         if (node instanceof ChildNode && node.getType() == PathOperator.Type.OBJECT) {
             pop();
-            push(new ArrayIndex(((ChildNode)node).getKey()));
+            push(new ArrayIndex(((ChildNode) node).getKey()));
         } else {
             if (operators.length > size) {
                 PathOperator next = operators[size];

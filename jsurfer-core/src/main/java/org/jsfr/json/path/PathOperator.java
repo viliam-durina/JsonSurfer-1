@@ -29,6 +29,7 @@ import org.jsfr.json.resolver.Resolvable;
 
 public abstract class PathOperator implements Resolvable {
 
+    @SuppressWarnings("checkstyle:JavadocVariable")
     public enum Type {
         ROOT,
         OBJECT,
@@ -38,7 +39,7 @@ public abstract class PathOperator implements Resolvable {
         FILTER_ROOT
     }
 
-    abstract public Type getType();
+    public abstract Type getType();
 
     public boolean match(PathOperator pathOperator) {
         return getType() == pathOperator.getType();

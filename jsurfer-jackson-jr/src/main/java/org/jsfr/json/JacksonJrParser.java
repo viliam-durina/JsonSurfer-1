@@ -74,12 +74,12 @@ public class JacksonJrParser implements JsonParserAdapter {
 
     private static class JacksonResumableParser implements ResumableParser {
 
-        private JsonParser jsonParser;
-        SurfingContext context;
-        private AbstractPrimitiveHolder stringHolder;
-        private AbstractPrimitiveHolder longHolder;
-        private AbstractPrimitiveHolder doubleHolder;
-        private StaticPrimitiveHolder staticHolder;
+        protected SurfingContext context;
+        private final JsonParser jsonParser;
+        private final AbstractPrimitiveHolder stringHolder;
+        private final AbstractPrimitiveHolder longHolder;
+        private final AbstractPrimitiveHolder doubleHolder;
+        private final StaticPrimitiveHolder staticHolder;
 
         JacksonResumableParser(final JsonParser jsonParser, SurfingContext context) {
             this.jsonParser = jsonParser;
@@ -106,7 +106,7 @@ public class JacksonJrParser implements JsonParserAdapter {
                 }
 
                 @Override
-                public void doSkipValue() throws IOException {
+                public void doSkipValue() {
                 }
             };
             this.doubleHolder = new AbstractPrimitiveHolder(context.getConfig()) {
@@ -116,7 +116,7 @@ public class JacksonJrParser implements JsonParserAdapter {
                 }
 
                 @Override
-                public void doSkipValue() throws IOException {
+                public void doSkipValue() {
                 }
             };
             this.staticHolder = new StaticPrimitiveHolder();
@@ -210,6 +210,9 @@ public class JacksonJrParser implements JsonParserAdapter {
 
     }
 
+    /**
+     * Immutable shared instance
+     */
     public static final JacksonJrParser INSTANCE = new JacksonJrParser();
 
     private final JsonFactory factory;

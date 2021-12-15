@@ -35,7 +35,6 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +45,21 @@ import static org.jsfr.json.compiler.JsonPathCompiler.compile;
  * SurfingConfiguration is immutable object that hold all JSONPath binding information
  */
 public class SurfingConfiguration {
+
+    private Charset parserCharset;
+    private int minDepth = Integer.MAX_VALUE;
+    private int maxDepth = -1;
+    private boolean skipOverlappedPath;
+    private boolean hasFilter;
+    private boolean closeParserOnStop = true;
+
+    private Binding[][] definitePathLookup;
+
+    // sorted by minimum path depth
+    private IndefinitePathBinding[] indefinitePathLookup = new IndefinitePathBinding[0];
+
+    private JsonProvider jsonProvider;
+    private ErrorHandlingStrategy errorHandlingStrategy;
 
     public static class FilterConfig {
         JsonPath filterRootPath;
@@ -74,41 +88,19 @@ public class SurfingConfiguration {
 
     public static class Binding {
 
+        JsonPath jsonPath;
+        JsonPathFilter filter;
+        Binding dependency;
+        JsonPathListener[] listeners;
+
         Binding(JsonPath jsonPath, JsonPathListener[] listeners) {
             this.jsonPath = jsonPath;
             this.listeners = listeners;
         }
 
-        JsonPath jsonPath;
-        JsonPathFilter filter;
-        Binding dependency;
-        JsonPathListener[] listeners;
-//        FilteredJsonPathListener[] filteredListeners;
-
-        //        FilteredJsonPathListener[] wrapWithFilteredListener(ParsingContext context, SurfingConfiguration config) {
-//            for (int i = 0; i < listeners.length; i++)
-//                filteredListeners[i] = new FilteredJsonPathListener(getListeners()[i], context, config);
-//            return filteredListeners;
-//        }
-//
         JsonPathListener[] getListeners() {
-//            if (filteredListeners[0] == null) // if empty
             return listeners;
-//            else
-//                return filteredListeners;
         }
-//
-//        void unwrapListeners() {
-//            for (int i = 0; i < filteredListeners.length; i++) {
-//                if (filteredListeners[i].getUnderlyingListener() instanceof FilteredJsonPathListener) {
-//                    FilteredJsonPathListener filteredListener = filteredListeners[i];
-//                    filteredListeners[i] = (FilteredJsonPathListener) filteredListener.getUnderlyingListener();
-//                    filteredListener.clear();
-//                } else {
-//                    filteredListeners[i] = null;
-//                }
-//            }
-//        }
 
     }
 
@@ -125,21 +117,25 @@ public class SurfingConfiguration {
 
     public static class Builder {
 
+        private static final Comparator<IndefinitePathBinding> INDEFINITE_BINDING_COMPARATOR =
+            Comparator.comparingInt(o -> o.minimumPathDepth);
+
         private JsonSurfer jsonSurfer;
         private SurfingConfiguration configuration;
-        private Map<Integer, ArrayList<Binding>> definiteBindings = new HashMap<Integer, ArrayList<Binding>>();
-        private ArrayList<IndefinitePathBinding> indefiniteBindings = new ArrayList<IndefinitePathBinding>();
-        private boolean hasFilter = false;
+        private final Map<Integer, ArrayList<Binding>> definiteBindings = new HashMap<Integer, ArrayList<Binding>>();
+        private final ArrayList<IndefinitePathBinding> indefiniteBindings = new ArrayList<IndefinitePathBinding>();
+        private boolean hasFilter;
 
         public SurfingConfiguration build() {
             if (!indefiniteBindings.isEmpty()) {
-                Collections.sort(indefiniteBindings, INDEFINITE_BINDING_COMPARATOR);
+                indefiniteBindings.sort(INDEFINITE_BINDING_COMPARATOR);
                 configuration.indefinitePathLookup = indefiniteBindings.toArray(new IndefinitePathBinding[0]);
             }
             if (!definiteBindings.isEmpty()) {
                 configuration.definitePathLookup = new Binding[configuration.maxDepth - configuration.minDepth + 1][];
                 for (Map.Entry<Integer, ArrayList<Binding>> entry : definiteBindings.entrySet()) {
-                    configuration.definitePathLookup[entry.getKey() - configuration.minDepth] = entry.getValue().toArray(new Binding[0]);
+                    configuration.definitePathLookup[entry.getKey() - configuration.minDepth]
+                        = entry.getValue().toArray(new Binding[0]);
                 }
             }
             configuration.hasFilter = this.hasFilter;
@@ -228,7 +224,7 @@ public class SurfingConfiguration {
         private ArrayList<Binding> getDefiniteBindings(int depth) {
             ArrayList<Binding> bindings = definiteBindings.get(depth);
             if (bindings == null) {
-                bindings = new ArrayList<Binding>();
+                bindings = new ArrayList<>();
                 definiteBindings.put(depth, bindings);
             }
             return bindings;
@@ -301,28 +297,6 @@ public class SurfingConfiguration {
         }
 
     }
-
-    private static final Comparator<IndefinitePathBinding> INDEFINITE_BINDING_COMPARATOR = new Comparator<IndefinitePathBinding>() {
-        @Override
-        public int compare(IndefinitePathBinding o1, IndefinitePathBinding o2) {
-            return Integer.compare(o1.minimumPathDepth, o2.minimumPathDepth);
-        }
-    };
-
-    private Charset parserCharset;
-    private int minDepth = Integer.MAX_VALUE;
-    private int maxDepth = -1;
-    private boolean skipOverlappedPath = false;
-    private boolean hasFilter = false;
-    private boolean closeParserOnStop = true;
-
-    private Binding[][] definitePathLookup;
-
-    // sorted by minimum path depth
-    private IndefinitePathBinding[] indefinitePathLookup = new IndefinitePathBinding[0];
-
-    private JsonProvider jsonProvider;
-    private ErrorHandlingStrategy errorHandlingStrategy;
 
     public int getMinDepth() {
         return minDepth;

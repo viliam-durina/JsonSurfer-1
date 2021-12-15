@@ -31,15 +31,16 @@ import java.util.Collection;
 
 public class JsonFilterVerifier implements JsonSaxHandler {
 
-    private SurfingConfiguration config;
-    private JsonPathFilter jsonPathFilter;
-    private Collection<BufferedListener> bufferedListeners;
-    private JsonFilterVerifier dependency;
-    private JsonPosition currentPosition;
-    private boolean verified = false;
-    private int stackDepth = 0;
+    private final SurfingConfiguration config;
+    private final JsonPathFilter jsonPathFilter;
+    private final Collection<BufferedListener> bufferedListeners;
+    private final JsonFilterVerifier dependency;
+    private final JsonPosition currentPosition;
+    private boolean verified;
+    private int stackDepth;
 
-    public JsonFilterVerifier(JsonPosition currentPosition, SurfingConfiguration config, JsonPathFilter jsonPathFilter, JsonFilterVerifier dependency) {
+    public JsonFilterVerifier(JsonPosition currentPosition, SurfingConfiguration config,
+        JsonPathFilter jsonPathFilter, JsonFilterVerifier dependency) {
         this.currentPosition = currentPosition;
         this.config = config;
         this.jsonPathFilter = jsonPathFilter;

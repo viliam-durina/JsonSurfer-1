@@ -28,27 +28,43 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.parser.JSONLexerBase;
 import com.alibaba.fastjson.parser.JSONReaderScanner;
 import com.alibaba.fastjson.parser.JSONScanner;
-import org.jsfr.json.exception.JsonSurfingException;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 
-import static com.alibaba.fastjson.parser.JSONToken.*;
+import static com.alibaba.fastjson.parser.JSONToken.COLON;
+import static com.alibaba.fastjson.parser.JSONToken.COMMA;
+import static com.alibaba.fastjson.parser.JSONToken.EOF;
+import static com.alibaba.fastjson.parser.JSONToken.ERROR;
+import static com.alibaba.fastjson.parser.JSONToken.FALSE;
+import static com.alibaba.fastjson.parser.JSONToken.IDENTIFIER;
+import static com.alibaba.fastjson.parser.JSONToken.LBRACE;
+import static com.alibaba.fastjson.parser.JSONToken.LBRACKET;
+import static com.alibaba.fastjson.parser.JSONToken.LITERAL_FLOAT;
+import static com.alibaba.fastjson.parser.JSONToken.LITERAL_INT;
+import static com.alibaba.fastjson.parser.JSONToken.LITERAL_STRING;
+import static com.alibaba.fastjson.parser.JSONToken.NEW;
+import static com.alibaba.fastjson.parser.JSONToken.NULL;
+import static com.alibaba.fastjson.parser.JSONToken.RBRACE;
+import static com.alibaba.fastjson.parser.JSONToken.RBRACKET;
+import static com.alibaba.fastjson.parser.JSONToken.SET;
+import static com.alibaba.fastjson.parser.JSONToken.TREE_SET;
+import static com.alibaba.fastjson.parser.JSONToken.TRUE;
+import static com.alibaba.fastjson.parser.JSONToken.UNDEFINED;
 
 /**
  * Created by Leo on 2017/3/31.
  */
-public class FastJsonParser implements JsonParserAdapter {
+public final class FastJsonParser implements JsonParserAdapter {
 
     private static class FastJsonResumableParser implements ResumableParser {
 
-        private JSONLexerBase lexer;
-        private SurfingContext context;
-        private StaticPrimitiveHolder staticPrimitiveHolder;
+        private final JSONLexerBase lexer;
+        private final SurfingContext context;
+        private final StaticPrimitiveHolder staticPrimitiveHolder;
 
-        public FastJsonResumableParser(JSONLexerBase lexer, SurfingContext context, StaticPrimitiveHolder staticPrimitiveHolder) {
+        FastJsonResumableParser(JSONLexerBase lexer, SurfingContext context, StaticPrimitiveHolder staticPrimitiveHolder) {
             this.lexer = lexer;
             this.context = context;
             this.staticPrimitiveHolder = staticPrimitiveHolder;
@@ -75,6 +91,7 @@ public class FastJsonParser implements JsonParserAdapter {
             }
         }
 
+        @SuppressWarnings({"checkstyle:CyclomaticComplexity", "checkstyle:MethodLength"})
         private void doParse() {
 
             try {
@@ -83,7 +100,6 @@ public class FastJsonParser implements JsonParserAdapter {
                 while (!lexer.isEOF() && !context.shouldBreak()) {
                     lexer.nextToken();
                     int token = lexer.token();
-                    //System.out.println("token: " + token);
                     if (tempString != null) {
                         if (token == COLON) {
                             context.startObjectEntry(tempString);
@@ -115,7 +131,6 @@ public class FastJsonParser implements JsonParserAdapter {
                             context.primitive(staticPrimitiveHolder.withValue(lexer.longValue()));
                             break;
                         case LITERAL_FLOAT:
-                            // Number value = lexer.decimalValue(lexer.isEnabled(Feature.UseBigDecimal));
                             context.primitive(staticPrimitiveHolder.withValue(lexer.doubleValue()));
                             break;
                         case IDENTIFIER:
@@ -156,7 +171,10 @@ public class FastJsonParser implements JsonParserAdapter {
         }
     }
 
-    public final static FastJsonParser INSTANCE = new FastJsonParser();
+    /**
+     * Immutable shared instance
+     */
+    public static final FastJsonParser INSTANCE = new FastJsonParser();
 
     private FastJsonParser() {
     }
@@ -188,7 +206,8 @@ public class FastJsonParser implements JsonParserAdapter {
 
     @Override
     public ResumableParser createResumableParser(InputStream json, SurfingContext context) {
-        return new FastJsonResumableParser(new JSONReaderScanner(new InputStreamReader(json, context.getConfig().getParserCharset())), context, new StaticPrimitiveHolder());
+        return new FastJsonResumableParser(new JSONReaderScanner(
+            new InputStreamReader(json, context.getConfig().getParserCharset())), context, new StaticPrimitiveHolder());
     }
 
     @Override

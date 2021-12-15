@@ -8,6 +8,9 @@ import org.apache.commons.compress.utils.IOUtils;
 
 public final class TestUtils {
 
+    private TestUtils() {
+    }
+
     public static String readClasspathResource(String resourceName, Charset charset) {
         InputStream inputStream = ClassLoader.getSystemResourceAsStream(resourceName);
         if (inputStream == null) {
@@ -15,8 +18,7 @@ public final class TestUtils {
         }
         try {
             return new String(IOUtils.toByteArray(inputStream), charset);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             return null;
         }
     }

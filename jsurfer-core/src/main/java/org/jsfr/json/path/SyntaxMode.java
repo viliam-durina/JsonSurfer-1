@@ -1,5 +1,6 @@
 package org.jsfr.json.path;
 
+@SuppressWarnings("checkstyle:JavadocVariable")
 public enum SyntaxMode {
     LAX, STRICT;
 
