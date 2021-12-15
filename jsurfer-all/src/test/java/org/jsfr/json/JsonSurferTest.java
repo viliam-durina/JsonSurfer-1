@@ -54,15 +54,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 public abstract class JsonSurferTest<O extends P, A extends P, P> {
 
@@ -617,7 +617,7 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
     public void testStoppableParsing() throws Exception {
         JsonPathListener mockListener = mock(JsonPathListener.class);
         doNothing().when(mockListener)
-            .onValue(anyObject(), argThat(new TypeSafeMatcher<ParsingContext>() {
+            .onValue(any(), argThat(new TypeSafeMatcher<ParsingContext>() {
 
                 @Override
                 public boolean matchesSafely(ParsingContext parsingContext) {
@@ -635,7 +635,7 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
             .bind("$.store.book[3]", mockListener)
             .buildAndSurf(read("sample.json"));
         verify(mockListener, times(1))
-            .onValue(anyObject(), any(ParsingContext.class));
+            .onValue(any(), any(ParsingContext.class));
 
     }
 
@@ -646,7 +646,7 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
             .bind("$.store.*", mockListener)
             .buildAndSurf(read("sample.json"));
         verify(mockListener, times(7))
-            .onValue(anyObject(), any(ParsingContext.class));
+            .onValue(any(), any(ParsingContext.class));
     }
 
     @Test
@@ -656,7 +656,7 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
             .bind("$.store.book[*]", mockListener)
             .buildAndSurf(read("sample.json"));
         verify(mockListener, times(4))
-            .onValue(anyObject(), any(ParsingContext.class));
+            .onValue(any(), any(ParsingContext.class));
     }
 
     @Test
@@ -664,7 +664,7 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
         JsonPathListener mockListener = mock(JsonPathListener.class);
         surfer.configBuilder().bind("$.store.book[*].*", mockListener)
             .buildAndSurf(read("sample.json"));
-        verify(mockListener, times(18)).onValue(anyObject(),
+        verify(mockListener, times(18)).onValue(any(),
             any(ParsingContext.class));
     }
 
@@ -680,10 +680,10 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
             .bind("$[2:]", mock3)
             .bind("$[:]", mock4)
             .buildAndSurf(read("array.json"));
-        verify(mock1, times(2)).onValue(anyObject(), any(ParsingContext.class));
-        verify(mock2, times(2)).onValue(anyObject(), any(ParsingContext.class));
-        verify(mock3, times(3)).onValue(anyObject(), any(ParsingContext.class));
-        verify(mock4, times(5)).onValue(anyObject(), any(ParsingContext.class));
+        verify(mock1, times(2)).onValue(any(), any(ParsingContext.class));
+        verify(mock2, times(2)).onValue(any(), any(ParsingContext.class));
+        verify(mock3, times(3)).onValue(any(), any(ParsingContext.class));
+        verify(mock4, times(5)).onValue(any(), any(ParsingContext.class));
     }
 
     @Test
@@ -891,8 +891,8 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
     public void testErrorStrategySuppressException() throws Exception {
 
         JsonPathListener mock = mock(JsonPathListener.class);
-        doNothing().doThrow(Exception.class).doThrow(Exception.class).when(mock)
-            .onValue(anyObject(), any(ParsingContext.class));
+        doNothing().doThrow(RuntimeException.class).doThrow(RuntimeException.class).when(mock)
+            .onValue(any(), any(ParsingContext.class));
 
         surfer.configBuilder().bind("$.store.book[*]", mock)
             .withErrorStrategy(new ErrorHandlingStrategy() {
@@ -908,21 +908,21 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
                 }
             })
             .buildAndSurf(read("sample.json"));
-        verify(mock, times(4)).onValue(anyObject(), any(ParsingContext.class));
+        verify(mock, times(4)).onValue(any(), any(ParsingContext.class));
     }
 
     @Test
     public void testErrorStrategyThrowException() {
 
         JsonPathListener mock = mock(JsonPathListener.class);
-        doNothing().doThrow(Exception.class).doThrow(Exception.class).when(mock)
-            .onValue(anyObject(), any(ParsingContext.class));
+        doNothing().doThrow(RuntimeException.class).doThrow(RuntimeException.class).when(mock)
+            .onValue(any(Object.class), any(ParsingContext.class));
         try {
             surfer.configBuilder().bind("$.store.book[*]", mock).buildAndSurf(read("sample.json"));
         } catch (Exception e) {
             // catch mock exception
         }
-        verify(mock, times(2)).onValue(anyObject(), any(ParsingContext.class));
+        verify(mock, times(2)).onValue(any(), any(ParsingContext.class));
     }
 
     @Test
