@@ -13,7 +13,7 @@
     <artifactId>jsurfer-core</artifactId>
 
     <properties>
-        <antlr.version>4.9.1</antlr.version>
+        <antlr.version>4.9.3</antlr.version>
     </properties>
 
     <profiles>
