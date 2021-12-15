@@ -37,14 +37,15 @@ import java.io.StringReader;
 public class GsonParser implements JsonParserAdapter {
 
     private static class GsonResumableParser implements ResumableParser {
-        private JsonReader jsonReader;
-        private SurfingContext context;
-        private AbstractPrimitiveHolder stringHolder;
-        private AbstractPrimitiveHolder numberHolder;
-        private AbstractPrimitiveHolder booleanHolder;
-        private AbstractPrimitiveHolder nullHolder;
+        private final JsonReader jsonReader;
+        private final SurfingContext context;
+        private final AbstractPrimitiveHolder stringHolder;
+        private final AbstractPrimitiveHolder numberHolder;
+        private final AbstractPrimitiveHolder booleanHolder;
+        private final AbstractPrimitiveHolder nullHolder;
 
-        public GsonResumableParser(JsonReader jsonReader, SurfingContext context, AbstractPrimitiveHolder stringHolder, AbstractPrimitiveHolder numberHolder, AbstractPrimitiveHolder booleanHolder, AbstractPrimitiveHolder nullHolder) {
+        GsonResumableParser(JsonReader jsonReader, SurfingContext context, AbstractPrimitiveHolder stringHolder,
+            AbstractPrimitiveHolder numberHolder, AbstractPrimitiveHolder booleanHolder, AbstractPrimitiveHolder nullHolder) {
             this.jsonReader = jsonReader;
             this.context = context;
             this.stringHolder = stringHolder;
@@ -122,6 +123,7 @@ public class GsonParser implements JsonParserAdapter {
                         case END_DOCUMENT:
                             context.endJSON();
                             break;
+                        default:
                     }
                 }
                 if (context.getConfig().isCloseParserOnStop() && context.isStopped()) {
@@ -133,9 +135,12 @@ public class GsonParser implements JsonParserAdapter {
         }
     }
 
-    public final static GsonParser INSTANCE = new GsonParser();
+    /**
+     * Immutable shared instance
+     */
+    public static final GsonParser INSTANCE = new GsonParser();
 
-    private JsonReaderFactory jsonReaderFactory;
+    private final JsonReaderFactory jsonReaderFactory;
 
     public GsonParser() {
         this.jsonReaderFactory = new DefaultJsonReaderFactory();

@@ -66,7 +66,7 @@ import static org.mockito.Mockito.verify;
 
 public abstract class JsonSurferTest<O extends P, A extends P, P> {
 
-    protected final static Logger LOGGER = LoggerFactory.getLogger(JsonSurferTest.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(JsonSurferTest.class);
 
     protected JsonSurfer surfer;
 
@@ -97,16 +97,16 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
 
     @Test
     public void testWildcardAtRoot() throws Exception {
-        Collection<Object> collection = surfer.collectAll("[\n" +
-            "    {\n" +
-            "      \"type\"  : \"iPhone\",\n" +
-            "      \"number\": \"0123-4567-8888\"\n" +
-            "    },\n" +
-            "    {\n" +
-            "      \"type\"  : \"home\",\n" +
-            "      \"number\": \"0123-4567-8910\"\n" +
-            "    }\n" +
-            "  ]", JsonPathCompiler.compile("$[*]"));
+        Collection<Object> collection = surfer.collectAll("[\n"
+            + "    {\n"
+            + "      \"type\"  : \"iPhone\",\n"
+            + "      \"number\": \"0123-4567-8888\"\n"
+            + "    },\n"
+            + "    {\n"
+            + "      \"type\"  : \"home\",\n"
+            + "      \"number\": \"0123-4567-8910\"\n"
+            + "    }\n"
+            + "  ]", JsonPathCompiler.compile("$[*]"));
         LOGGER.debug("Collect all at root - {}", collection);
         assertEquals(2, collection.size());
     }
@@ -919,8 +919,7 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
             .onValue(anyObject(), any(ParsingContext.class));
         try {
             surfer.configBuilder().bind("$.store.book[*]", mock).buildAndSurf(read("sample.json"));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             // catch mock exception
         }
         verify(mock, times(2)).onValue(anyObject(), any(ParsingContext.class));
@@ -951,7 +950,7 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
     public void testJsonPathFilterMatchRegexFlags() throws Exception {
         JsonPathListener mockListener = mock(JsonPathListener.class);
         surfer.configBuilder()
-            .bind("$.store.book[?(@.author=~/tolkien/i)]", mockListener) // we assume other flags work too
+            .bind("$.store.book[?(@.author=~/tolkien/i)]", mockListener)
             .buildAndSurf(read("sample_filter.json"));
         verify(mockListener, times(1)).onValue(argThat(new CustomMatcher<Object>("Test filter") {
 
@@ -1153,7 +1152,7 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
     }
 
     @Test
-    public void test_sqlArrayRange() throws Exception {
+    public void testSqlArrayRange() throws Exception {
         JsonPath path = JsonPathCompiler.compile("$[1 to 2]");
         Collector collector = surfer.collector(read("array.json"));
         ValueBox<Collection<Object>> box = collector.collectAll(path, Object.class);
@@ -1162,7 +1161,7 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
     }
 
     @Test
-    public void test_sqlPropertyQuoting() throws Exception {
+    public void testSqlPropertyQuoting() throws Exception {
         JsonPath path = JsonPathCompiler.compile("$.\"store\".\"book\"[0].\"author\"");
         Collector collector = surfer.collector(read("sample.json"));
         ValueBox<String> box = collector.collectOne(path, String.class);
@@ -1244,11 +1243,11 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
         assertEquals(1, box1.get().size());
         Map<Object, Object> el  = new HashMap<>();
         List<?> item = (List<?>) box1.get().iterator().next();
-        assertEquals(1, ((Number)item.get(0)).intValue());
+        assertEquals(1, ((Number) item.get(0)).intValue());
         assertEquals("2", item.get(1));
-        assertEquals(3, ((Number)item.get(2)).intValue());
-        assertEquals(1, ((Number)((Map<?, ?>)item.get(3)).get("t")).intValue());
-        assertEquals(3, ((Number)box2.get().iterator().next()).intValue());
+        assertEquals(3, ((Number) item.get(2)).intValue());
+        assertEquals(1, ((Number) ((Map<?, ?>) item.get(3)).get("t")).intValue());
+        assertEquals(3, ((Number) box2.get().iterator().next()).intValue());
     }
 
     @Test
@@ -1280,8 +1279,7 @@ public abstract class JsonSurferTest<O extends P, A extends P, P> {
     private static <T> T cast(Object o) {
         try {
             return (T) o;
-        }
-        catch (ClassCastException e) {
+        } catch (ClassCastException e) {
             return null;
         }
     }

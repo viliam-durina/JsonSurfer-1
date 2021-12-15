@@ -75,12 +75,12 @@ public class JacksonParser implements JsonParserAdapter {
 
     private static class JacksonResumableParser implements ResumableParser {
 
-        private JsonParser jsonParser;
-        SurfingContext context;
-        private AbstractPrimitiveHolder stringHolder;
-        private AbstractPrimitiveHolder longHolder;
-        private AbstractPrimitiveHolder doubleHolder;
-        private StaticPrimitiveHolder staticHolder;
+        protected SurfingContext context;
+        private final JsonParser jsonParser;
+        private final AbstractPrimitiveHolder stringHolder;
+        private final AbstractPrimitiveHolder longHolder;
+        private final AbstractPrimitiveHolder doubleHolder;
+        private final StaticPrimitiveHolder staticHolder;
 
         JacksonResumableParser(final JsonParser jsonParser, SurfingContext context) {
             this.jsonParser = jsonParser;
@@ -203,18 +203,21 @@ public class JacksonParser implements JsonParserAdapter {
                     default:
                         throw new IllegalStateException("Unexpected token: " + token);
                 }
-            }
-            if (context.getConfig().isCloseParserOnStop() && context.isStopped()) {
-                this.jsonParser.close();
+                if (context.getConfig().isCloseParserOnStop() && context.isStopped()) {
+                    this.jsonParser.close();
+                }
             }
         }
 
     }
 
     private static final JsonFactory JSON_FACTORY = new JsonFactory();
+    /**
+     * Immutable shared instance
+     */
     public static final JacksonParser INSTANCE = new JacksonParser(JSON_FACTORY);
 
-    private JsonFactory factory;
+    private final JsonFactory factory;
     private FormatSchema formatSchema;
 
     public JacksonParser(JsonFactory factory) {

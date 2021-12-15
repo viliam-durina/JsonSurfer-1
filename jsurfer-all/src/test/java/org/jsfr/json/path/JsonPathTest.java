@@ -138,7 +138,7 @@ public class JsonPathTest {
     }
 
     @Test
-    public void lax_is_supported_syntax_mode() {
+    public void laxIsSupportedSyntaxMode() {
         //given
         JsonPath position = compile("$.book.store.title");
 
@@ -154,7 +154,7 @@ public class JsonPathTest {
     }
 
     @Test
-    public void strict_is_not_supported_syntax_mode() {
+    public void strictIsNotSupportedSyntaxMode() {
         //given
         String path = "strict $.book[*].store.title";
 
@@ -169,7 +169,7 @@ public class JsonPathTest {
     }
 
     @Test
-    public void compiler_errors_should_be_handler() {
+    public void compilerErrorsShouldBeHandler() {
         //given
         String path1 = "$((@@$#229))";
         String path2 = "";
@@ -202,7 +202,7 @@ public class JsonPathTest {
     }
 
     @Test
-    public void array_range() {
+    public void arrayRange() {
         //given
         JsonPath path = compile("$.book[0 to 2]");
 
@@ -218,7 +218,7 @@ public class JsonPathTest {
     }
 
     @Test
-    public void array_slicing() {
+    public void arraySlicing() {
         //given
         JsonPath path = compile("$.book[0:2]");
 

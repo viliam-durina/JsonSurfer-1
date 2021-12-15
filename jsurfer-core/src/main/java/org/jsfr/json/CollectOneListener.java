@@ -26,17 +26,17 @@ package org.jsfr.json;
 
 class CollectOneListener implements JsonPathListener {
 
-    private boolean shallStopImmediately;
+    private final boolean shallStopImmediately;
 
-    private boolean gotData = false;
+    private boolean gotData;
 
     private Object value;
 
-    public CollectOneListener() {
+    CollectOneListener() {
         this(false);
     }
 
-    public CollectOneListener(boolean shallStopImmediately) {
+    CollectOneListener(boolean shallStopImmediately) {
         this.shallStopImmediately = shallStopImmediately;
     }
 

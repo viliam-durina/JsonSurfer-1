@@ -31,9 +31,9 @@ import java.io.IOException;
  */
 public abstract class AbstractPrimitiveHolder implements PrimitiveHolder {
 
-    private boolean executed = false;
+    private boolean executed;
     private Object value;
-    private SurfingConfiguration surfingConfiguration;
+    private final SurfingConfiguration surfingConfiguration;
 
     public AbstractPrimitiveHolder(SurfingConfiguration surfingConfiguration) {
         this.surfingConfiguration = surfingConfiguration;

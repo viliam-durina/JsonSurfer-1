@@ -29,9 +29,15 @@ import org.jsfr.json.provider.JacksonJrProvider;
 /**
  * Created by Leo on 2017/4/1.
  */
-public class JsonSurferJacksonJr {
+public final class JsonSurferJacksonJr {
 
-    public final static JsonSurfer INSTANCE = new JsonSurfer(JacksonJrParser.INSTANCE, JacksonJrProvider.INSTANCE);
+    /**
+     *
+     */
+    public static final JsonSurfer INSTANCE = new JsonSurfer(JacksonJrParser.INSTANCE, JacksonJrProvider.INSTANCE);
+
+    private JsonSurferJacksonJr() {
+    }
 
     public static JsonSurfer createSurfer() {
       return new JsonSurfer(new JacksonJrParser(), JacksonJrProvider.INSTANCE);

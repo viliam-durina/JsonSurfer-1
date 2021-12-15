@@ -57,6 +57,7 @@ import org.jsfr.json.path.SyntaxMode;
 /**
  * Created by Leo on 2015/4/1.
  */
+@SuppressWarnings({"checkstyle:ClassFanOutComplexity", "checkstyle:MethodCount"})
 public class JsonPathCompiler extends JsonPathBaseVisitor<Void> {
 
     private JsonPath.Builder pathBuilder;
@@ -160,18 +161,15 @@ public class JsonPathCompiler extends JsonPathBaseVisitor<Void> {
             filterBuilder.startNegationPredicate();
             rst = super.visitFilterExpr(ctx);
             filterBuilder.endNegationAndPredicate();
-        }
-        else if (ctx.AndOperator() != null) {
+        } else if (ctx.AndOperator() != null) {
             filterBuilder.startAndPredicate();
             rst = super.visitFilterExpr(ctx);
             filterBuilder.endAndPredicate();
-        }
-        else if (ctx.OrOperator() != null) {
+        } else if (ctx.OrOperator() != null) {
             filterBuilder.startOrPredicate();
             rst = super.visitFilterExpr(ctx);
             filterBuilder.endOrPredicate();
-        }
-        else {
+        } else {
             rst = super.visitFilterExpr(ctx);
         }
         return rst;
@@ -310,8 +308,10 @@ public class JsonPathCompiler extends JsonPathBaseVisitor<Void> {
     }
 
     private static Pattern toPattern(String str) {
-        String[] split = str.split("(?<!\\\\)/"); // slash not escaped by backslash
-        if (split.length == 3) { // includes flags
+        // slash not escaped by backslash
+        String[] split = str.split("(?<!\\\\)/");
+        // includes flags
+        if (split.length == 3) {
             String regex = split[1];
             String flagsStr = split[2];
             int flags = 0;
@@ -337,12 +337,11 @@ public class JsonPathCompiler extends JsonPathBaseVisitor<Void> {
                 flags |= Pattern.UNICODE_CHARACTER_CLASS;
             }
             return Pattern.compile(regex, flags);
-        }
-        else if (split.length == 2 && str.endsWith("/")) { // no flags defined
+            // no flags defined
+        } else if (split.length == 2 && str.endsWith("/")) {
             String regex = split[1];
             return Pattern.compile(regex);
-        }
-        else {
+        } else {
             throw new InputMismatchException("Invalid regex pattern");
         }
     }
@@ -350,17 +349,13 @@ public class JsonPathCompiler extends JsonPathBaseVisitor<Void> {
     private void array(String key, JsonPathParser.ArrayContext ctx) {
         if (ctx.index() != null) {
             arrayIndex(key, currentPathBuilder(), ctx.index());
-        }
-        else if (ctx.indexes() != null) {
+        } else if (ctx.indexes() != null) {
             arrayIndexes(key, currentPathBuilder(), ctx.indexes());
-        }
-        else if (ctx.slicing() != null) {
+        } else if (ctx.slicing() != null) {
             arraySlicing(key, this.pathBuilder, ctx.slicing());
-        }
-        else if (ctx.filter() != null) {
+        } else if (ctx.filter() != null) {
             arrayFilter(key, ctx.filter());
-        }
-        else if (ctx.ANY_INDEX() != null) {
+        } else if (ctx.ANY_INDEX() != null) {
             currentPathBuilder().arrayWildcard(key);
         }
     }
@@ -394,8 +389,7 @@ public class JsonPathCompiler extends JsonPathBaseVisitor<Void> {
                     throw new RuntimeException("Array subscript invalid range");
                 }
                 ranges.put(index, rangeEnd);
-            }
-            else {
+            } else {
                 indexes.add(index);
             }
         }
@@ -413,8 +407,7 @@ public class JsonPathCompiler extends JsonPathBaseVisitor<Void> {
                 if (((TerminalNode) node).getSymbol().getType() == JsonPathParser.COLON) {
                     left = temp;
                     temp = null;
-                }
-                else if (tNode.getSymbol().getType() == JsonPathParser.NUM) {
+                } else if (tNode.getSymbol().getType() == JsonPathParser.NUM) {
                     temp = Integer.parseInt(tNode.getText());
                 }
             }

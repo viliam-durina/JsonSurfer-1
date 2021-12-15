@@ -86,13 +86,13 @@ public class JacksonParserTest extends JsonSurferTest {
         JsonPathListener mockListener = mock(JsonPathListener.class);
 
         ObjectMapper mapper = new ProtobufMapper();
-        String protobuf_str = "message Employee {\n"
+        String protobufStr = "message Employee {\n"
                 + " required string name = 1;\n"
                 + " required int32 age = 2;\n"
                 + " repeated string emails = 3;\n"
                 + " optional Employee boss = 4;\n"
                 + "}\n";
-        final ProtobufSchema schema = ProtobufSchemaLoader.std.parse(protobuf_str);
+        final ProtobufSchema schema = ProtobufSchemaLoader.std.parse(protobufStr);
 
         Employee empl = new Employee();
         empl.age = 30;
@@ -112,7 +112,7 @@ public class JacksonParserTest extends JsonSurferTest {
     public void testAvroParser() throws Exception {
         JsonPathListener mockListener = mock(JsonPathListener.class);
 
-        String SCHEMA_JSON = "{\n"
+        String schemaJson = "{\n"
                 + "\"type\": \"record\",\n"
                 + "\"name\": \"Employee\",\n"
                 + "\"fields\": [\n"
@@ -121,7 +121,7 @@ public class JacksonParserTest extends JsonSurferTest {
                 + " {\"name\": \"emails\", \"type\": {\"type\": \"array\", \"items\": \"string\"}},\n"
                 + " {\"name\": \"boss\", \"type\": [\"Employee\",\"null\"]}\n"
                 + "]}";
-        Schema raw = new Schema.Parser().setValidate(true).parse(SCHEMA_JSON);
+        Schema raw = new Schema.Parser().setValidate(true).parse(schemaJson);
         final AvroSchema schema = new AvroSchema(raw);
 
         Employee empl = new Employee();

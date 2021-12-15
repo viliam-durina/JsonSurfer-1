@@ -29,11 +29,16 @@ import org.json.simple.JSONObject;
 
 import java.math.BigInteger;
 
-public class JsonSimpleProvider implements JsonProvider<JSONObject, JSONArray, Object> {
+public final class JsonSimpleProvider implements JsonProvider<JSONObject, JSONArray, Object> {
 
+    /**
+     * Immutable shared instance
+     */
     public static final JsonSimpleProvider INSTANCE = new JsonSimpleProvider();
 
-    private JsonSimpleProvider(){}
+    private JsonSimpleProvider() {
+
+    }
 
     @Override
     public JSONObject createObject() {

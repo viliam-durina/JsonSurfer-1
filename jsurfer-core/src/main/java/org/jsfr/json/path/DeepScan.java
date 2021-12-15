@@ -27,8 +27,11 @@ package org.jsfr.json.path;
 /**
  * Created by Administrator on 2015/3/25.
  */
-public class DeepScan extends PathOperator {
+public final class DeepScan extends PathOperator {
 
+    /**
+     * Singleton immutable instance
+     */
     public static final DeepScan SINGLETON = new DeepScan();
 
     private DeepScan() {

@@ -39,9 +39,28 @@ public class JsonPath implements Iterable<PathOperator> {
 
     private static final int JSON_PATH_INITIAL_CAPACITY = 20;
 
+    protected PathOperator[] operators;
+    protected int size;
+
+    private boolean definite = true;
+
+    protected JsonPath() {
+        this(false);
+    }
+
+    protected JsonPath(boolean filterPath) {
+        operators = new PathOperator[JSON_PATH_INITIAL_CAPACITY];
+        if (filterPath) {
+            operators[0] = FilterRoot.instance();
+        } else {
+            operators[0] = Root.instance();
+        }
+        size = 1;
+    }
+
     private class JsonPathIterator implements Iterator<PathOperator> {
 
-        private int current = 0;
+        private int current;
 
         @Override
         public boolean hasNext() {
@@ -109,6 +128,7 @@ public class JsonPath implements Iterable<PathOperator> {
             return this;
         }
 
+        @SuppressWarnings("checkstyle:IllegalType")
         public Builder array(String key, Set<Integer> indexes, TreeMap<Integer, Integer> ranges) {
             jsonPath.push(new ArrayIndexes(key, indexes, ranges));
             return this;
@@ -149,25 +169,6 @@ public class JsonPath implements Iterable<PathOperator> {
             return this.jsonPath;
         }
 
-    }
-
-    private boolean definite = true;
-
-    protected PathOperator[] operators;
-    protected int size;
-
-    protected JsonPath() {
-        this(false);
-    }
-
-    protected JsonPath(boolean filterPath) {
-        operators = new PathOperator[JSON_PATH_INITIAL_CAPACITY];
-        if (filterPath) {
-            operators[0] = FilterRoot.instance();
-        } else {
-            operators[0] = Root.instance();
-        }
-        size = 1;
     }
 
     public Object resolve(Object document, DocumentResolver resolver) {

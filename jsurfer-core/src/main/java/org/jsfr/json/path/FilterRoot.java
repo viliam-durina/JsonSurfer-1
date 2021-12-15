@@ -26,15 +26,18 @@ package org.jsfr.json.path;
 
 import org.jsfr.json.resolver.DocumentResolver;
 
-public class FilterRoot extends PathOperator {
+public final class FilterRoot extends PathOperator {
 
-    private final static FilterRoot INSTANCE = new FilterRoot();
+    /**
+     * Immutable shared instance
+     */
+    private static final FilterRoot INSTANCE = new FilterRoot();
+
+    private FilterRoot() {
+    }
 
     public static FilterRoot instance() {
         return INSTANCE;
-    }
-
-    private FilterRoot() {
     }
 
     @Override
