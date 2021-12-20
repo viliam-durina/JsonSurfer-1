@@ -4,38 +4,54 @@ grammar JsonPath;
 package org.jsfr.json.compiler;
 }
 
-path: '$' relativePath* EOF;
-relativePath: searchChild|search|index|indexes|slicing|childNode|childrenNode|anyChild|anyIndex|any|filter;
-searchChild: '..' KEY;
+path: syntaxMode? '$' relativePath* EOF;
+syntaxMode: 'lax' | 'LAX' | 'strict' | 'STRICT';
+relativePath: searchChild|search|childNode|array|childrenNode|anyChild|any;
+searchChild: '..' KEY array?;
 search: '..' ;
 anyChild: '.*' ;
-anyIndex: '[*]' ;
 any: '*' ;
+ANY_INDEX: '[*]' ;
 index: ('[' NUM ']') | ('.' NUM);
-indexes: '[' NUM ( ',' NUM )* ']' ;
+indexes: OPEN_SQ_BRACKET NUM (TO NUM)? ( COMMA NUM (TO NUM)? ) * CLOSE_SQ_BRACKET ;
+OPEN_SQ_BRACKET: '[';
+CLOSE_SQ_BRACKET: ']';
+TO: 'to';
+COMMA: ',';
 slicing: '[' NUM? COLON NUM? ']';
-COLON : ':';
-childNode: '.' KEY ;
-childrenNode: '[' QUOTED_STRING ( ',' QUOTED_STRING )* ']' ;
 filter: '[?(' filterExpr ')]';
+COLON : ':';
+childNode: '.' (KEY | QUOTED_STRING) array?;
+array: index | indexes | slicing | filter | ANY_INDEX;
+childrenNode: '[' QUOTED_STRING ( ',' QUOTED_STRING )* ']' ;
 filterExpr : NegationOperator '(' filterExpr ')'
            | filterExpr AndOperator filterExpr
            | filterExpr OrOperator filterExpr
            | filterEqualNum
+           | filterNEqualNum
            | filterEqualStr
+           | filterNEqualStr
            | filterMatchRegex
            | filterEqualBool
+           | filterNEqualBool
            | filterGtNum
+           | filterGeNum
            | filterLtNum
+           | filterLeNum
            | filterExist
            ;
-filterExist:  '@' relativePath+;
-filterGtNum:  '@' relativePath+ '>' NUM;
-filterLtNum:  '@' relativePath+ '<' NUM;
-filterEqualNum: '@' relativePath+ '==' NUM;
-filterEqualBool: '@' relativePath+ '==' BOOL;
-filterEqualStr: '@' relativePath+ '==' QUOTED_STRING;
-filterMatchRegex: '@' relativePath+ '=~' REGEX;
+filterExist:  '@' relativePath*;
+filterGtNum:  '@' relativePath* '>' NUM;
+filterGeNum:  '@' relativePath* '>=' NUM;
+filterLtNum:  '@' relativePath* '<' NUM;
+filterLeNum:  '@' relativePath* '<=' NUM;
+filterEqualNum: '@' relativePath* '==' NUM;
+filterNEqualNum: '@' relativePath* NE NUM;
+filterEqualBool: '@' relativePath* '==' BOOL;
+filterNEqualBool: '@' relativePath* NE BOOL;
+filterEqualStr: '@' relativePath* '==' QUOTED_STRING;
+filterNEqualStr: '@' relativePath* NE QUOTED_STRING;
+filterMatchRegex: '@' relativePath* '=~' REGEX;
 //exprArrayIdx: '@.length-' NUM;
 NegationOperator: '!';
 AndOperator: '&&';
@@ -48,6 +64,7 @@ NUM
 QUOTED_STRING : ('\'' ( ~('\''|'\\') | ('\\' .) )* '\'') | ('"' ( ~('"'|'\\') | ('\\' .) )* '"');
 REGEX : '/' ( ~('/'|'\\') | ('\\' .) )* '/' [idmsuxU]*;
 BOOL: 'true'|'false';
+NE: '<>'|'!=';
 KEY :  (ESC | ~(["\\] | '.' | '*' | '[' | ']' | '(' | ')' | ',' | ':'| '=' | '@' | '?' | '&' | '|' | '>' | '<' | '\''| '!' | [ \t\n\r]))+  ;
 
 fragment INT :   '0' | [1-9] [0-9]* ; // no leading zeros
@@ -57,5 +74,3 @@ fragment UNICODE : 'u' HEX HEX HEX HEX ;
 fragment HEX : [0-9a-fA-F] ;
 
 WS  :   [ \t\n\r]+ -> skip ;
-
-

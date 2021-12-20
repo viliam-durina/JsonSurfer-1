@@ -43,12 +43,12 @@ import java.util.Map;
  */
 public class SurfingContext implements ParsingContext, JsonSaxHandler {
 
-    private boolean stopped = false;
-    private boolean paused = false;
+    private boolean stopped;
+    private boolean paused;
     private JsonPosition currentPosition;
-    private ContentDispatcher dispatcher = new ContentDispatcher();
+    private final ContentDispatcher dispatcher = new ContentDispatcher();
     private FilterVerifierDispatcher filterVerifierDispatcher;
-    private SurfingConfiguration config;
+    private final SurfingConfiguration config;
     private Map<String, Object> transientMap;
 
     SurfingContext(SurfingConfiguration config) {
@@ -84,19 +84,6 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
                 }
             }
 
-//            if (listeners != null) {
-//
-//                JsonFilterVerifier filterVerifier = (JsonFilterVerifier) this.filterVerifierDispatcher.getLastReceiver();
-//                if (filterVerifier != null) {
-//                    LinkedList<JsonPathListener> wrappedListeners = new LinkedList<>();
-//                    for (JsonPathListener listener : listeners) {
-//                        wrappedListeners.add(filterVerifier.addListener(listener));
-//                    }
-//                    listeners = wrappedListeners;
-//                }
-//
-//            }
-
         } else {
             // skip matching if "skipOverlappedPath" is enable
             if (config.isSkipOverlappedPath() && !dispatcher.isEmpty()) {
@@ -120,19 +107,24 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
         }
 
         if (listeners != null) {
-            JsonCollector collector = new JsonCollector(listeners.size() == 1 ? Collections.singleton(listeners.getFirst()) : listeners, this, config);
+            JsonCollector collector = new JsonCollector(listeners.size() == 1
+                ? Collections.singleton(listeners.getFirst()) : listeners, this, config);
             dispatcher.addReceiver(collector);
         }
 
     }
 
-    private LinkedList<JsonPathListener> doMatchingWithFilter(Binding binding, PrimitiveHolder primitiveHolder, LinkedList<JsonPathListener> listeners, boolean definiteBinding) {
-        boolean matched = definiteBinding ? binding.jsonPath.match(currentPosition) : binding.jsonPath.matchWithDeepScan(currentPosition);
+    private LinkedList<JsonPathListener> doMatchingWithFilter(Binding binding, PrimitiveHolder primitiveHolder,
+        LinkedList<JsonPathListener> listeners, boolean definiteBinding) {
+        boolean matched = definiteBinding
+            ? binding.jsonPath.match(currentPosition) : binding.jsonPath.matchWithDeepScan(currentPosition);
         if (matched) {
             if (binding.filter != null) {
                 // JsonPathFilter is stateful so clone is required
                 // TODO not clone for stateless filter
-                this.filterVerifierDispatcher.addVerifier(binding, new JsonFilterVerifier(currentPosition, config, (JsonPathFilter) ((CloneableJsonPathFilter) binding.filter).cloneMe(), this.filterVerifierDispatcher.getVerifier(binding.dependency)));
+                this.filterVerifierDispatcher.addVerifier(binding, new JsonFilterVerifier(currentPosition, config,
+                    (JsonPathFilter) ((CloneableJsonPathFilter) binding.filter).cloneMe(),
+                    this.filterVerifierDispatcher.getVerifier(binding.dependency)));
             } else {
                 if (primitiveHolder != null) {
                     dispatchPrimitiveWithFilter(binding.getListeners(), primitiveHolder.getValue(), binding.dependency);
@@ -144,8 +136,10 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
         return listeners;
     }
 
-    private LinkedList<JsonPathListener> doMatching(Binding binding, PrimitiveHolder primitiveHolder, LinkedList<JsonPathListener> listeners, boolean definiteBinding) {
-        boolean matched = definiteBinding ? binding.jsonPath.match(currentPosition) : binding.jsonPath.matchWithDeepScan(currentPosition);
+    private LinkedList<JsonPathListener> doMatching(Binding binding, PrimitiveHolder primitiveHolder,
+        LinkedList<JsonPathListener> listeners, boolean definiteBinding) {
+        boolean matched = definiteBinding ? binding.jsonPath.match(currentPosition)
+            : binding.jsonPath.matchWithDeepScan(currentPosition);
         if (matched) {
             if (primitiveHolder != null) {
                 dispatchPrimitive(binding.getListeners(), primitiveHolder.getValue());
@@ -156,8 +150,9 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
         return listeners;
     }
 
-    private LinkedList<JsonPathListener> addListeners(Binding binding, LinkedList<JsonPathListener> listeners, JsonFilterVerifier verifier) {
-        LinkedList<JsonPathListener> listenersToAdd = listeners == null ? new LinkedList<JsonPathListener>() : listeners;
+    private LinkedList<JsonPathListener> addListeners(Binding binding, LinkedList<JsonPathListener> listeners,
+        JsonFilterVerifier verifier) {
+        LinkedList<JsonPathListener> listenersToAdd = listeners == null ? new LinkedList<>() : listeners;
         JsonPathListener[] bindingListeners = binding.getListeners();
         for (JsonPathListener listener : bindingListeners) {
             if (verifier != null) {
@@ -224,7 +219,7 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
                 doMatching(null);
                 break;
             case ARRAY:
-                accumulateArrayIndex((ArrayIndex) currentNode);
+                accumulateArrayIndex(currentNode);
 //                startArrayElement();
                 doMatching(null);
                 break;
@@ -266,10 +261,10 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
         PathOperator currentNode = currentPosition.peek();
         switch (currentNode.getType()) {
             case OBJECT:
-                doMatching(null);
+                //doMatching(null);
                 break;
             case ARRAY:
-                accumulateArrayIndex((ArrayIndex) currentNode);
+                accumulateArrayIndex(currentNode);
 //                startArrayElement();
                 doMatching(null);
                 break;
@@ -284,8 +279,12 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
         return true;
     }
 
-    private void accumulateArrayIndex(ArrayIndex arrayIndex) {
-        arrayIndex.increaseArrayIndex();
+    private void accumulateArrayIndex(PathOperator arrayIndex) {
+        if (arrayIndex instanceof ArrayIndex) {
+            ((ArrayIndex) arrayIndex).increaseArrayIndex();
+        } else {
+            throw new IllegalStateException("Only array and root array operators are expected");
+        }
     }
 
     @Override
@@ -309,7 +308,7 @@ public class SurfingContext implements ParsingContext, JsonSaxHandler {
                 doMatching(primitiveHolder);
                 break;
             case ARRAY:
-                accumulateArrayIndex((ArrayIndex) currentNode);
+                accumulateArrayIndex(currentNode);
 //                startArrayElement();
                 doMatching(primitiveHolder);
                 break;

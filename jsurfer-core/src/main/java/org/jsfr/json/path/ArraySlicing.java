@@ -27,14 +27,19 @@ package org.jsfr.json.path;
 /**
  * Created by Leo on 2015/4/1.
  */
-public class ArraySlicing extends PathOperator {
+public class ArraySlicing extends ChildNode {
 
-    private Integer lowerBound;
-    private Integer upperBound;
+    private final Integer lowerBound;
+    private final Integer upperBound;
 
-    protected ArraySlicing(Integer lowerBound, Integer upperBound) {
+    protected ArraySlicing(String key, Integer lowerBound, Integer upperBound) {
+        super(key);
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
+    }
+
+    protected ArraySlicing(Integer lowerBound, Integer upperBound) {
+        this(null, lowerBound, upperBound);
     }
 
     @Override

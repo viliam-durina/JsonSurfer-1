@@ -36,6 +36,9 @@ import java.math.BigInteger;
 
 public class JacksonProvider implements JsonProvider<ObjectNode, ArrayNode, JsonNode> {
 
+    /**
+     * Immutable shared instance
+     */
     public static final JacksonProvider INSTANCE = new JacksonProvider();
 
     private ObjectMapper om;

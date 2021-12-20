@@ -30,8 +30,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class JavaCollectionProvider implements JsonProvider<Map<String, Object>, List<Object>, Object> {
+public final class JavaCollectionProvider implements JsonProvider<Map<String, Object>, List<Object>, Object> {
 
+    /**
+     * Immutable shared instance
+     */
     public static final JavaCollectionProvider INSTANCE = new JavaCollectionProvider();
 
     private JavaCollectionProvider() {

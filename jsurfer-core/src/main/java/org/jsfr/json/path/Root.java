@@ -28,13 +28,13 @@ import org.jsfr.json.resolver.DocumentResolver;
 
 public class Root extends PathOperator {
 
-    private final static Root INSTANCE = new Root();
+    private static final Root INSTANCE = new Root();
+
+    protected Root() {
+    }
 
     public static Root instance() {
         return INSTANCE;
-    }
-
-    private Root() {
     }
 
     @Override

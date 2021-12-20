@@ -42,7 +42,8 @@ public class BufferedListener implements JsonPathListener {
 
     @Override
     public void onValue(Object value, ParsingContext context) {
-        buffer.add(new BufferedListener.ValueAndContext(value, context)); // buffer if we haven't verified filter yet
+        // buffer if we haven't verified filter yet
+        buffer.add(new BufferedListener.ValueAndContext(value, context));
     }
 
     public void invokeBufferedValue() {

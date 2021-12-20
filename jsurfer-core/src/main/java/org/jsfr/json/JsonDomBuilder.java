@@ -43,7 +43,7 @@ public class JsonDomBuilder implements JsonSaxHandler {
     private String propertyName;
 
     private Node[] stack = new Node[32];
-    private int stackSize = 0;
+    private int stackSize;
 
     public JsonDomBuilder(JsonProvider provider) {
         this.provider = provider;
@@ -131,6 +131,7 @@ public class JsonDomBuilder implements JsonSaxHandler {
                 break;
             case IN_ARRAY:
                 throw new IllegalStateException();
+            default:
         }
         return true;
     }
@@ -143,6 +144,7 @@ public class JsonDomBuilder implements JsonSaxHandler {
                 break;
             case IN_ARRAY:
                 throw new IllegalStateException();
+            default:
         }
         return false;
     }

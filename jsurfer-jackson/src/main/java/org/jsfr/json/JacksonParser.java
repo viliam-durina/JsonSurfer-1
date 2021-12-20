@@ -53,7 +53,7 @@ public class JacksonParser implements JsonParserAdapter {
                     nonBlockingJsonParser.feedInput(bytes, start, end);
                     if (context.isPaused()) {
                         context.resume();
-                        doPare();
+                        doParse();
                     } else {
                         parse();
                     }
@@ -75,12 +75,12 @@ public class JacksonParser implements JsonParserAdapter {
 
     private static class JacksonResumableParser implements ResumableParser {
 
-        private JsonParser jsonParser;
-        SurfingContext context;
-        private AbstractPrimitiveHolder stringHolder;
-        private AbstractPrimitiveHolder longHolder;
-        private AbstractPrimitiveHolder doubleHolder;
-        private StaticPrimitiveHolder staticHolder;
+        protected SurfingContext context;
+        private final JsonParser jsonParser;
+        private final AbstractPrimitiveHolder stringHolder;
+        private final AbstractPrimitiveHolder longHolder;
+        private final AbstractPrimitiveHolder doubleHolder;
+        private final StaticPrimitiveHolder staticHolder;
 
         JacksonResumableParser(final JsonParser jsonParser, SurfingContext context) {
             this.jsonParser = jsonParser;
@@ -130,7 +130,7 @@ public class JacksonParser implements JsonParserAdapter {
                     return false;
                 }
                 context.resume();
-                doPare();
+                doParse();
                 return true;
             } catch (Exception e) {
                 context.getConfig().getErrorHandlingStrategy().handleParsingException(e);
@@ -142,13 +142,13 @@ public class JacksonParser implements JsonParserAdapter {
         public void parse() {
             context.startJSON();
             try {
-                doPare();
+                doParse();
             } catch (Exception e) {
                 context.getConfig().getErrorHandlingStrategy().handleParsingException(e);
             }
         }
 
-        void doPare() throws IOException {
+        void doParse() throws IOException {
             JsonProvider jsonProvider = context.getConfig().getJsonProvider();
             while (!context.shouldBreak()) {
                 JsonToken token = jsonParser.nextToken();
@@ -201,20 +201,23 @@ public class JacksonParser implements JsonParserAdapter {
                         break;
                     case VALUE_EMBEDDED_OBJECT:
                     default:
-                        throw new IllegalStateException("Unexpected token");
+                        throw new IllegalStateException("Unexpected token: " + token);
                 }
-            }
-            if (context.getConfig().isCloseParserOnStop() && context.isStopped()) {
-                this.jsonParser.close();
+                if (context.getConfig().isCloseParserOnStop() && context.isStopped()) {
+                    this.jsonParser.close();
+                }
             }
         }
 
     }
 
     private static final JsonFactory JSON_FACTORY = new JsonFactory();
+    /**
+     * Immutable shared instance
+     */
     public static final JacksonParser INSTANCE = new JacksonParser(JSON_FACTORY);
 
-    private JsonFactory factory;
+    private final JsonFactory factory;
     private FormatSchema formatSchema;
 
     public JacksonParser(JsonFactory factory) {

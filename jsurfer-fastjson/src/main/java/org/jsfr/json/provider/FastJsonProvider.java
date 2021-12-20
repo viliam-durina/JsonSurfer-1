@@ -33,11 +33,16 @@ import java.math.BigInteger;
 /**
  * Created by Leo on 2017/4/1.
  */
-public class FastJsonProvider implements JsonProvider<JSONObject, JSONArray, Object> {
+public final class FastJsonProvider implements JsonProvider<JSONObject, JSONArray, Object> {
 
-    public final static FastJsonProvider INSTANCE = new FastJsonProvider();
+    /**
+     * Immutable shared instance
+     */
+    public static final FastJsonProvider INSTANCE = new FastJsonProvider();
 
-    private FastJsonProvider() {}
+    private FastJsonProvider() {
+
+    }
 
     @Override
     public Object resolve(JSONObject object, String key) {

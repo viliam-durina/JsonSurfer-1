@@ -40,16 +40,18 @@ import static org.jsfr.json.compiler.JsonPathCompiler.compile;
 
 /**
  * JsonSurfer traverses the whole json DOM tree, compare the path of each node with registered JsonPath
- * and return the matched value immediately. JsonSurfer is fully streaming which means that it doesn't construct the DOM tree in memory.
+ * and return the matched value immediately. JsonSurfer is fully streaming which means that it doesn't construct
+ * the DOM tree in memory.
  */
+@SuppressWarnings("checkstyle:MethodCount")
 public class JsonSurfer {
 
     private static final String KEY_HAS_MATCH = "_JSURFER_INTERNAL_HAS_MATCH_";
     private static final String KEY_MATCH = "_JSURFER_INTERNAL_MATCH_";
 
-    private JsonProvider jsonProvider;
-    private JsonParserAdapter jsonParserAdapter;
-    private ErrorHandlingStrategy errorHandlingStrategy;
+    private final JsonProvider jsonProvider;
+    private final JsonParserAdapter jsonParserAdapter;
+    private final ErrorHandlingStrategy errorHandlingStrategy;
     private Charset parserCharset = StandardCharsets.UTF_8;
 
     /**
@@ -65,7 +67,8 @@ public class JsonSurfer {
      * @param jsonProvider          jsonProvider
      * @param errorHandlingStrategy errorHandlingStrategy
      */
-    public JsonSurfer(JsonParserAdapter jsonParserAdapter, JsonProvider jsonProvider, ErrorHandlingStrategy errorHandlingStrategy) {
+    public JsonSurfer(JsonParserAdapter jsonParserAdapter, JsonProvider jsonProvider,
+        ErrorHandlingStrategy errorHandlingStrategy) {
         this.jsonProvider = jsonProvider;
         this.jsonParserAdapter = jsonParserAdapter;
         this.errorHandlingStrategy = errorHandlingStrategy;
@@ -81,7 +84,8 @@ public class JsonSurfer {
     }
 
     /**
-     * Create a streaming iterator which can pull matched value one by one according to provided JsonPath. Internally, only one matched value stored in memory
+     * Create a streaming iterator which can pull matched value one by one according to provided JsonPath.
+     * Internally, only one matched value stored in memory
      *
      * @param reader   Json source
      * @param jsonPath JsonPath
@@ -97,7 +101,8 @@ public class JsonSurfer {
     }
 
     /**
-     * Create a streaming iterator which can pull matched value one by one according to provided JsonPath. Internally, only one matched value stored in memory
+     * Create a streaming iterator which can pull matched value one by one according to provided JsonPath.
+     * Internally, only one matched value stored in memory
      *
      * @param inputStream Json source
      * @param jsonPath    JsonPath
@@ -111,7 +116,8 @@ public class JsonSurfer {
     }
 
     /**
-     * Create a streaming iterator which can pull matched value one by one according to provided JsonPath. Internally, only one matched value stored in memory
+     * Create a streaming iterator which can pull matched value one by one according to provided JsonPath.
+     * Internally, only one matched value stored in memory
      *
      * @param json     Json source
      * @param jsonPath JsonPath
@@ -129,7 +135,8 @@ public class JsonSurfer {
 
             @Override
             public boolean hasNext() {
-                return context.load(KEY_HAS_MATCH, Boolean.class) || resumableParser.resume() && context.load(KEY_HAS_MATCH, Boolean.class);
+                return context.load(KEY_HAS_MATCH, Boolean.class)
+                    || resumableParser.resume() && context.load(KEY_HAS_MATCH, Boolean.class);
             }
 
             @Override

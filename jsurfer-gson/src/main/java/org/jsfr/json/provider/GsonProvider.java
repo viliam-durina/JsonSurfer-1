@@ -36,9 +36,12 @@ import java.math.BigInteger;
 
 public class GsonProvider implements JsonProvider<JsonObject, JsonArray, JsonElement> {
 
-    public final static GsonProvider INSTANCE = new GsonProvider();
+    /**
+     * Immutable shared instance
+     */
+    public static final GsonProvider INSTANCE = new GsonProvider();
 
-    private Gson internalGson;
+    private final Gson internalGson;
 
     public GsonProvider() {
         this(new GsonBuilder().create());

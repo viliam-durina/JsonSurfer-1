@@ -24,6 +24,7 @@
 
 package org.jsfr.json.path;
 
+import org.jsfr.json.exception.UnsupportedStateException;
 import org.jsfr.json.filter.JsonPathFilter;
 import org.jsfr.json.resolver.DocumentResolver;
 
@@ -31,14 +32,35 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.TreeMap;
 
 public class JsonPath implements Iterable<PathOperator> {
 
     private static final int JSON_PATH_INITIAL_CAPACITY = 20;
 
+    protected PathOperator[] operators;
+    protected int size;
+
+    private boolean definite = true;
+
+    protected JsonPath() {
+        this(false);
+    }
+
+    protected JsonPath(boolean filterPath) {
+        operators = new PathOperator[JSON_PATH_INITIAL_CAPACITY];
+        if (filterPath) {
+            operators[0] = FilterRoot.instance();
+        } else {
+            operators[0] = Root.instance();
+        }
+        size = 1;
+    }
+
     private class JsonPathIterator implements Iterator<PathOperator> {
 
-        private int current = 0;
+        private int current;
 
         @Override
         public boolean hasNext() {
@@ -70,7 +92,10 @@ public class JsonPath implements Iterable<PathOperator> {
 
         private JsonPath jsonPath;
 
-        public static Builder start() {
+        public static Builder start(SyntaxMode mode) {
+            if (mode == SyntaxMode.STRICT) {
+                throw new UnsupportedStateException("STRICT json path mode is not supported");
+            }
             Builder builder = new Builder();
             builder.jsonPath = new JsonPath();
             return builder;
@@ -98,18 +123,29 @@ public class JsonPath implements Iterable<PathOperator> {
         }
 
 
-        public Builder index(int index) {
-            jsonPath.push(new ArrayIndex(index));
+        public Builder array(String key, int index) {
+            jsonPath.push(new ArrayIndex(key, index));
             return this;
         }
 
-        public Builder indexes(Integer... indexes) {
-            jsonPath.push(new ArrayIndexes(new HashSet<Integer>(Arrays.asList(indexes))));
+        @SuppressWarnings("checkstyle:IllegalType")
+        public Builder array(String key, Set<Integer> indexes, TreeMap<Integer, Integer> ranges) {
+            jsonPath.push(new ArrayIndexes(key, indexes, ranges));
             return this;
         }
 
-        public Builder anyIndex() {
-            jsonPath.push(Wildcard.SINGLETON);
+        public Builder array(String key, Integer lower, Integer upper) {
+            jsonPath.push(new ArraySlicing(key, lower, upper));
+            return this;
+        }
+
+        public Builder arrayWildcard(String key) {
+            jsonPath.push(new ArrayWildcard(key));
+            return this;
+        }
+
+        public Builder arrayFilter(String key, JsonPathFilter jsonPathFilter) {
+            jsonPath.push(new ArrayFilter(key, jsonPathFilter));
             return this;
         }
 
@@ -126,16 +162,6 @@ public class JsonPath implements Iterable<PathOperator> {
             return this;
         }
 
-        public Builder slicing(Integer lower, Integer upper) {
-            jsonPath.push(new ArraySlicing(lower, upper));
-            return this;
-        }
-
-        public Builder arrayFilter(JsonPathFilter jsonPathFilter) {
-            jsonPath.push(new ArrayFilter(jsonPathFilter));
-            return this;
-        }
-
         public JsonPath build() {
             if (jsonPath.peek().getType() == PathOperator.Type.DEEP_SCAN) {
                 throw new IllegalStateException("deep-scan shouldn't be the last operator.");
@@ -143,25 +169,6 @@ public class JsonPath implements Iterable<PathOperator> {
             return this.jsonPath;
         }
 
-    }
-
-    private boolean definite = true;
-
-    protected PathOperator[] operators;
-    protected int size;
-
-    protected JsonPath() {
-        this(false);
-    }
-
-    protected JsonPath(boolean filterPath) {
-        operators = new PathOperator[JSON_PATH_INITIAL_CAPACITY];
-        if (filterPath) {
-            operators[0] = FilterRoot.instance();
-        } else {
-            operators[0] = Root.instance();
-        }
-        size = 1;
     }
 
     public Object resolve(Object document, DocumentResolver resolver) {
@@ -255,17 +262,9 @@ public class JsonPath implements Iterable<PathOperator> {
     public boolean matchFilterPath(JsonPath jsonPath) {
         int pointer1 = this.size - 1;
         int pointer2 = jsonPath.size - 1;
-        if (!get(pointer1).match(jsonPath.get(pointer2))) {
-            return false;
-        }
-        pointer1--;
-        pointer2--;
-        while (pointer1 >= 0) {
-            if (!(pointer2 >= 0)) {
-                return false;
-            }
-            PathOperator o1 = this.get(pointer1--);
-            PathOperator o2 = jsonPath.get(pointer2--);
+        for (; pointer1 >= 0 && pointer2 >= 0; pointer1--, pointer2--) {
+            PathOperator o1 = this.get(pointer1);
+            PathOperator o2 = jsonPath.get(pointer2);
             // TODO Allow deep scan in filter path?
             if (o1.getType() == PathOperator.Type.FILTER_ROOT) {
                 return true;
@@ -275,7 +274,7 @@ public class JsonPath implements Iterable<PathOperator> {
                 }
             }
         }
-        return !(pointer2 >= 0);
+        return pointer2 < 0;
     }
 
     public JsonPath derivePath(int depth) {

@@ -26,9 +26,13 @@ package org.jsfr.json;
 
 import java.util.Collection;
 
-public class DispatchUtil {
+public final class DispatchUtil {
 
-    public static void dispatchValueToListeners(Object value, Collection<JsonPathListener> listeners, ParsingContext context, ErrorHandlingStrategy errorHandlingStrategy) {
+    private DispatchUtil() {
+    }
+
+    public static void dispatchValueToListeners(Object value, Collection<JsonPathListener> listeners,
+        ParsingContext context, ErrorHandlingStrategy errorHandlingStrategy) {
         for (JsonPathListener listener : listeners) {
             if (context.isStopped()) {
                 break;
@@ -41,7 +45,8 @@ public class DispatchUtil {
         }
     }
 
-    public static void dispatchValueToListeners(Object value, JsonPathListener[] listeners, ParsingContext context, ErrorHandlingStrategy errorHandlingStrategy) {
+    public static void dispatchValueToListeners(Object value, JsonPathListener[] listeners,
+        ParsingContext context, ErrorHandlingStrategy errorHandlingStrategy) {
         for (JsonPathListener listener : listeners) {
             if (context.isStopped()) {
                 break;

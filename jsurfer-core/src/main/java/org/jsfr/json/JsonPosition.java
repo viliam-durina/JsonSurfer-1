@@ -56,28 +56,43 @@ class JsonPosition extends JsonPath {
     }
 
     void stepIntoArray() {
-        if (operators.length > size) {
-            PathOperator next = operators[size];
-            if (next instanceof ArrayIndex) {
-                size++;
-                ((ArrayIndex) next).reset();
-                return;
-            }
-        }
-        push(new ArrayIndex());
-    }
-
-    boolean accumulateArrayIndex() {
-        PathOperator top = this.peek();
-        if (top.getType() == PathOperator.Type.ARRAY) {
-            ((ArrayIndex) top).increaseArrayIndex();
-            return true;
-        }
-        return false;
+        PathOperator last = peek();
+        pushArray(last);
     }
 
     void stepOutArray() {
-        pop();
+        popArray(peek());
     }
 
+    boolean isInsideArray() {
+        PathOperator last = peek();
+        return last instanceof ArrayIndex;
+    }
+
+    private void popArray(PathOperator node) {
+        if (node instanceof ArrayIndex) {
+            pop();
+            ArrayIndex indexNode = (ArrayIndex) node;
+            if (indexNode.getKey()  != null) {
+                push(new ChildNode(indexNode.getKey()));
+            }
+        }
+    }
+
+    private void pushArray(PathOperator node) {
+        if (node instanceof ChildNode && node.getType() == PathOperator.Type.OBJECT) {
+            pop();
+            push(new ArrayIndex(((ChildNode) node).getKey()));
+        } else {
+            if (operators.length > size) {
+                PathOperator next = operators[size];
+                if (next instanceof ArrayIndex) {
+                    size++;
+                    ((ArrayIndex) next).reset();
+                    return;
+                }
+            }
+            push(new ArrayIndex(null));
+        }
+    }
 }

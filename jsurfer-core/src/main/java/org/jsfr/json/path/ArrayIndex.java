@@ -29,15 +29,16 @@ import org.jsfr.json.resolver.DocumentResolver;
 /**
  * Created by Administrator on 2015/3/22.
  */
-public class ArrayIndex extends PathOperator {
+public class ArrayIndex extends ChildNode {
 
     private int arrayIndex = -1;
 
-    public ArrayIndex() {
+    public ArrayIndex(String key) {
+        super(key);
     }
 
-    public ArrayIndex(int arrayIndex) {
-        this();
+    public ArrayIndex(String key, int arrayIndex) {
+        super(key);
         this.arrayIndex = arrayIndex;
     }
 
@@ -59,7 +60,14 @@ public class ArrayIndex extends PathOperator {
 
     @Override
     public boolean match(PathOperator pathOperator) {
-        return super.match(pathOperator) && arrayIndex == ((ArrayIndex) pathOperator).arrayIndex;
+        if (!super.match(pathOperator)) {
+            return false;
+        }
+        if (pathOperator instanceof ArrayIndex) {
+            return arrayIndex == ((ArrayIndex) pathOperator).arrayIndex;
+        } else {
+            return super.match(pathOperator);
+        }
     }
 
     @Override
@@ -74,6 +82,10 @@ public class ArrayIndex extends PathOperator {
 
     @Override
     public String toString() {
-        return "[" + arrayIndex + "]";
+        if (getKey() == null) {
+            return "[" + arrayIndex + "]";
+        } else {
+            return super.toString() + "[" + arrayIndex + "]";
+        }
     }
 }

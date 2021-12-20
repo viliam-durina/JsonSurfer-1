@@ -31,8 +31,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 
-public class JsonSimpleParser implements JsonParserAdapter {
+public final class JsonSimpleParser implements JsonParserAdapter {
 
+    /**
+     * Immutable shared instance
+     */
     public static final JsonSimpleParser INSTANCE = new JsonSimpleParser();
 
     private JsonSimpleParser() {

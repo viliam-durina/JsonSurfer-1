@@ -34,11 +34,11 @@ import java.util.Collection;
  */
 class CollectAllListener<T> implements JsonPathListener {
 
-    private Collection<T> collection = new ArrayList<T>();
-    private JsonProvider jsonProvider;
-    private Class<T> tClass;
+    private final Collection<T> collection = new ArrayList<T>();
+    private final JsonProvider jsonProvider;
+    private final Class<T> tClass;
 
-    public CollectAllListener(JsonProvider jsonProvider, Class<T> tClass) {
+    CollectAllListener(JsonProvider jsonProvider, Class<T> tClass) {
         this.jsonProvider = jsonProvider;
         this.tClass = tClass;
     }
